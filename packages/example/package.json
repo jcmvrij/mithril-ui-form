@@ -33,6 +33,7 @@
     "mithril-ui-form": "workspace:^1.1.8",
     "mithril-ui-form-plugin": "workspace:^0.3.3",
     "mithril-ui-form-leaflet-plugin": "workspace:^0.3.0",
+    "mithril-ui-form-maplibre-plugin": "workspace:^0.0.1",
     "mithril-ui-form-rating-plugin": "workspace:^0.4.0"
   },
   "devDependencies": {

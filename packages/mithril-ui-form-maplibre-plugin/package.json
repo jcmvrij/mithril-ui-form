@@ -1,0 +1,28 @@
+{
+  "name": "mithril-ui-form-maplibre-plugin",
+  "version": "0.0.1",
+  "description": "See README",
+  "main": "lib/index.js",
+  "module": "lib/index.esm.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "clean": "rimraf lib dist",
+    "build": "microbundle",
+    "start": "microbundle watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/mithril": "^2.0.9",
+    "microbundle": "^0.14.2",
+    "typescript": "^4.6.2",
+    "mithril-ui-form-plugin": "workspace:^0.3.3"
+  },
+  "peerDependencies": {
+    "mithril": "^2.0.4"
+  },
+  "dependencies": {
+    "maplibre-gl": "^2.1.9"
+  }
+}

@@ -3,6 +3,7 @@ import { LayoutForm, registerPlugin, UIForm, SlimdownView, I18n, render } from '
 import { TextArea } from 'mithril-materialized';
 import { leafletPlugin } from 'mithril-ui-form-leaflet-plugin';
 import { ratingPlugin } from 'mithril-ui-form-rating-plugin';
+import { maplibrePlugin } from 'mithril-ui-form-maplibre-plugin';
 
 export interface IContext {
   admin: boolean;
@@ -147,6 +148,7 @@ You can also include _markdown_ in your UIForm.`,
   { id: 'id', type: 'text', disabled: true, autogenerate: 'guid', required: true, className: 'col m6' },
   { id: 'event', type: 'text', maxLength: 80, required: true, className: 'col m6' },
   { id: 'area', type: 'map', required: true, className: 'col s12' },
+  { id: 'area', type: 'libremap', required: true, className: 'col s12' },
   { id: 'categories', type: 'tags' },
   { id: 'description', type: 'textarea', maxLength: 500, required: false, icon: 'note', show: 'event' },
   { id: 'created', label: 'Created "{{event}}" event on:', type: 'date', required: true },
@@ -163,6 +165,7 @@ You can also include _markdown_ in your UIForm.`,
 export const FormView = () => {
   registerPlugin('map', leafletPlugin);
   registerPlugin('rating', ratingPlugin);
+  registerPlugin('libremap', maplibrePlugin);
 
   const state = {
     result: {} as ILessonLearned,
