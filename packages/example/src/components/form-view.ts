@@ -30,6 +30,7 @@ interface ILessonLearned {
   event: string;
   /** GeoJSON area definition */
   area: { [key: string]: any };
+  libremap: { [key: string]: any };
   description: string;
   categories: string[]; // TODO Allow the user to specify defaults
   created: Date;
@@ -148,7 +149,7 @@ You can also include _markdown_ in your UIForm.`,
   { id: 'id', type: 'text', disabled: true, autogenerate: 'guid', required: true, className: 'col m6' },
   { id: 'event', type: 'text', maxLength: 80, required: true, className: 'col m6' },
   { id: 'area', type: 'map', required: true, className: 'col s12' },
-  { id: 'area', type: 'libremap', required: true, className: 'col s12' },
+  { id: 'libremap', type: 'libremap', settings: { drawnPolygonLimit: 1 }, required: true, className: 'col s12' },
   { id: 'categories', type: 'tags' },
   { id: 'description', type: 'textarea', maxLength: 500, required: false, icon: 'note', show: 'event' },
   { id: 'created', label: 'Created "{{event}}" event on:', type: 'date', required: true },
@@ -207,6 +208,59 @@ export const FormView = () => {
           geometry: {
             type: 'Point',
             coordinates: [4.327293, 52.110118],
+          },
+        },
+      ],
+    },
+    libremap: {
+      polygons: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            id: '4430943cc1c115dab684af7716c01672',
+            type: 'Feature',
+            properties: {},
+            geometry: {
+              coordinates: [
+                [
+                  [4.325164424453902, 52.110598279004506],
+                  [4.326287984399585, 52.109583138578614],
+                  [4.3241056852743895, 52.10957650359774],
+                  [4.325164424453902, 52.110598279004506],
+                ],
+              ],
+              type: 'Polygon',
+            },
+          },
+        ],
+      },
+      sources: [
+        {
+          id: 'catTest',
+          source: {
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'Point',
+                  coordinates: [4.327293, 52.110118],
+                },
+              },
+            ],
+          },
+          layers: {
+            id: 'catTestLayer',
+            // type: 'symbol',
+            source: 'catTest',
+            layout: {
+              'icon-image': 'cat',
+              'icon-size': 0.2,
+              'icon-allow-overlap': true,
+            },
+            // paint: {},
+            filter: ['all'],
           },
         },
       ],
