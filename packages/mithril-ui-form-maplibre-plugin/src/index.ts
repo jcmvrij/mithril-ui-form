@@ -1,36 +1,29 @@
 import m from 'mithril';
 import { PluginType } from 'mithril-ui-form-plugin';
-import { MaplibreMap, MapLibreSource } from './component';
+import { MaplibreMap } from './component';
 import { FeatureCollection } from 'geojson';
+import { MapLibreSource } from './component-utils';
 
 export const maplibrePlugin: PluginType = () => {
   return {
-    view: ({ attrs: { iv, props, field, onchange } }) => {
+    view: ({ attrs: { iv, props, field } }) => {
+      // console.log('pluginlog = ');
+      // console.log(iv);
+      // console.log(props);
+      // console.log(field);
+
       const id = props.id || '';
-      console.log('test = ');
-      console.log(iv);
-      console.log(props);
-      console.log(field);
-
-      const initialSource: MapLibreSource = iv.sources;
-      const initialPolygons: FeatureCollection = iv.polygons;
-
-      const polygons = {} as Record<string, any>;
-      polygons[id] = initialPolygons;
+      const className = field.className || 'col s12';
+      const sources: MapLibreSource = iv.sources || {};
+      const polygons: FeatureCollection = iv.polygons || {};
+      const drawnPolygonLimit = field.drawnPolygonLimit || 1;
 
       return m(MaplibreMap, {
         id: id,
-        className: 'col s12',
-        sources: initialSource,
-        polygons,
-        mapOptions: {},
-        drawnPolygonLimit: field.settings.drawnPolygonLimit,
-        onPolygonEdit: (f: FeatureCollection) => {
-          console.log('t');
-          console.log(f);
-          onchange && onchange(f as any);
-          m.redraw();
-        },
+        className: className,
+        sources: sources,
+        polygons: polygons,
+        drawnPolygonLimit: drawnPolygonLimit,
       });
     },
   };

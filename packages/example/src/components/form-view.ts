@@ -149,7 +149,7 @@ You can also include _markdown_ in your UIForm.`,
   { id: 'id', type: 'text', disabled: true, autogenerate: 'guid', required: true, className: 'col m6' },
   { id: 'event', type: 'text', maxLength: 80, required: true, className: 'col m6' },
   { id: 'area', type: 'map', required: true, className: 'col s12' },
-  { id: 'libremap', type: 'libremap', settings: { drawnPolygonLimit: 1 }, required: true, className: 'col s12' },
+  { id: 'libremap', type: 'libremap', drawnPolygonLimit: 1, required: true, className: 'col s12' },
   { id: 'categories', type: 'tags' },
   { id: 'description', type: 'textarea', maxLength: 500, required: false, icon: 'note', show: 'event' },
   { id: 'created', label: 'Created "{{event}}" event on:', type: 'date', required: true },
@@ -236,7 +236,7 @@ export const FormView = () => {
       },
       sources: [
         {
-          id: 'catTest',
+          id: 'TeamBlue',
           source: {
             type: 'FeatureCollection',
             features: [
@@ -245,23 +245,81 @@ export const FormView = () => {
                 properties: {},
                 geometry: {
                   type: 'Point',
-                  coordinates: [4.327293, 52.110118],
+                  coordinates: [4.327293, 52.11],
+                },
+              },
+              {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'Point',
+                  coordinates: [4.327293, 52.114],
                 },
               },
             ],
           },
-          layers: {
-            id: 'catTestLayer',
-            // type: 'symbol',
-            source: 'catTest',
-            layout: {
-              'icon-image': 'cat',
-              'icon-size': 0.2,
-              'icon-allow-overlap': true,
+          layers: [
+            {
+              id: 'testLayer',
+              type: 'circle',
+              layout: {},
+              // type: 'symbol',
+              // layout: {
+              //   'icon-image': 'cat',
+              //   'icon-size': 0.2,
+              //   'icon-allow-overlap': true,
+              // },
+              paint: {
+                // 'circle-radius': 15,
+                'circle-radius': ['interpolate', ['exponential', 0.5], ['zoom'], 15, 30, 20, 5],
+                'circle-color': '#3887be',
+              },
+              filter: ['all'],
             },
-            // paint: {},
-            filter: ['all'],
+          ],
+        },
+        {
+          id: 'TeamRed',
+          source: {
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'Point',
+                  coordinates: [4.327293, 52.111],
+                },
+              },
+              {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'Point',
+                  coordinates: [4.327293, 52.112],
+                },
+              },
+            ],
           },
+          layers: [
+            {
+              id: 'testLayer',
+              type: 'circle',
+              layout: {},
+              // type: 'symbol',
+              // layout: {
+              //   'icon-image': 'cat',
+              //   'icon-size': 0.2,
+              //   'icon-allow-overlap': true,
+              // },
+              paint: {
+                // 'circle-radius': 15,
+                'circle-radius': ['interpolate', ['exponential', 0.5], ['zoom'], 15, 30, 20, 5],
+                'circle-color': '#eb4034',
+              },
+              filter: ['all'],
+            },
+          ],
         },
       ],
     },
