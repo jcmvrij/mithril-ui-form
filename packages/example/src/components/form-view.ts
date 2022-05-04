@@ -264,6 +264,7 @@ export const FormView = () => {
                 'icon-allow-overlap': true,
               },
               paint: {
+                'icon-opacity': 0.8,
                 // 'circle-radius': ['interpolate', ['exponential', 0.5], ['zoom'], 15, 30, 20, 5],
                 // 'circle-color': '#3887be',
               },
@@ -300,6 +301,7 @@ export const FormView = () => {
                 'icon-allow-overlap': true,
               },
               paint: {
+                'icon-opacity': 0.8,
                 // 'circle-radius': 15,
                 // 'circle-color': '#eb4034',
               },

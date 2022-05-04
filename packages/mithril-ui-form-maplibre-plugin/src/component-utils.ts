@@ -2,7 +2,7 @@ import m from 'mithril';
 import { FeatureCollection, Point } from 'geojson';
 import { GeoJSONFeature, GeoJSONSource, LayerSpecification, MapLayerMouseEvent } from 'maplibre-gl';
 
-interface MapLibreLayer {
+interface IMapLibreLayer {
   id: string;
   showLayer?: boolean;
   type: LayerSpecification;
@@ -11,10 +11,10 @@ interface MapLibreLayer {
   filter?: any[];
 }
 
-export interface MapLibreSource {
+export interface IMapLibreSource {
   id: string;
   source: FeatureCollection;
-  layers: MapLibreLayer[];
+  layers: IMapLibreLayer[];
 }
 
 export const handleDrawCreateEvent = (
@@ -52,8 +52,8 @@ export const updatePolygonsOnMap = (polygons: FeatureCollection, draw: MapboxDra
   draw.set(polygons);
 };
 
-export const updateSourcesAndLayers = (sources: MapLibreSource[], map: maplibregl.Map) => {
-  sources.forEach((source: MapLibreSource) => {
+export const updateSourcesAndLayers = (sources: IMapLibreSource[], map: maplibregl.Map, canvas: HTMLElement) => {
+  sources.forEach((source: IMapLibreSource) => {
     if (!map.getSource(source.id)) {
       map.addSource(source.id, {
         type: 'geojson',
@@ -77,65 +77,23 @@ export const updateSourcesAndLayers = (sources: MapLibreSource[], map: maplibreg
           filter: layer.filter,
         });
 
-        addMapListenersForLayer(map, layerId);
+        map.on('mouseenter', layerId, () => {
+          canvas.style.cursor = 'move';
+        });
+        map.on('mouseleave', layerId, () => {
+          canvas.style.cursor = '';
+        });
       }
     });
   });
 };
 
-const addMapListenersForLayer = (map: maplibregl.Map, layerId: string) => {
-  //   const eventsWhenMouseDownAndMove = (e: MapLayerMouseEvent) => {
-  //     const coordinates = e.lngLat;
-  //     canvas.style.cursor = 'grabbing';
-  //     // update map layer when moving
-  //     (map.getSource(source.id) as GeoJSONSource).setData({
-  //       type: 'FeatureCollection',
-  //       features: [
-  //         {
-  //           type: 'Feature',
-  //           properties: {},
-  //           geometry: {
-  //             type: 'Point',
-  //             coordinates: [coordinates.lng, coordinates.lat],
-  //           },
-  //         },
-  //       ],
-  //     });
-  //   };
-
-  const canvas = map.getCanvasContainer();
-  map.on('mouseenter', layerId, () => {
-    console.log('mouseenter event');
-    canvas.style.cursor = 'move';
-  });
-  map.on('mouseleave', layerId, () => {
-    console.log('mouseleave event');
-    canvas.style.cursor = '';
-  });
-
-  //   map.on('mousedown', layerId, (e) => {
-  //     console.log('mousedown event');
-  //     console.log(map.queryRenderedFeatures(e.point)[0]);
-  //     e.preventDefault();
-  //     canvas.style.cursor = 'grab';
-
-  //     map.on('mousemove', eventsWhenMouseDownAndMove);
-  //     map.once('mouseup', (e) => {
-  //       console.log('mouseup event');
-  //       canvas.style.cursor = '';
-  //       const coordinates = e.lngLat;
-  //       // update passed in source
-  //       (source.source.features[0].geometry as Point).coordinates = [coordinates.lng, coordinates.lat];
-  //       map.off('mousemove', eventsWhenMouseDownAndMove);
-  //       m.redraw();
-  //     });
-  //   });
-};
-
-export const addMapListenersForMovingFeatures = (map: maplibregl.Map, sources: MapLibreSource[]) => {
-  const canvas = map.getCanvasContainer();
+export const addMapListenersForMovingFeatures = (
+  map: maplibregl.Map,
+  sources: IMapLibreSource[],
+  canvas: HTMLElement
+) => {
   map.on('mousedown', (e) => {
-    console.log('mousedown event');
     const topFeatureAtClick = map.queryRenderedFeatures(e.point)[0];
     if (topFeatureAtClick.properties.movable) {
       e.preventDefault();
@@ -143,7 +101,7 @@ export const addMapListenersForMovingFeatures = (map: maplibregl.Map, sources: M
       const eventsWhenMouseDownAndMove = (e: MapLayerMouseEvent) => {
         const coordinates = e.lngLat;
         canvas.style.cursor = 'grabbing';
-        // update map layer when moving
+        // update map when moving
         (map.getSource(topFeatureAtClick.source) as GeoJSONSource).setData({
           type: 'FeatureCollection',
           features: [
@@ -160,10 +118,9 @@ export const addMapListenersForMovingFeatures = (map: maplibregl.Map, sources: M
       };
       map.on('mousemove', eventsWhenMouseDownAndMove);
       map.once('mouseup', (e) => {
-        console.log('mouseup event');
         canvas.style.cursor = '';
         const coordinates = e.lngLat;
-        // update passed in source
+        // saving location of feature to sources
         const index = sources.findIndex((source) => source.id === topFeatureAtClick.source);
         (sources[index].source.features[0].geometry as Point).coordinates = [coordinates.lng, coordinates.lat];
         map.off('mousemove', eventsWhenMouseDownAndMove);
