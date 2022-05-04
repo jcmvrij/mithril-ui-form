@@ -12,19 +12,20 @@ import maplibregl, {
 } from 'maplibre-gl';
 import m, { Attributes, FactoryComponent } from 'mithril';
 import {
+  addMapListenersForMovingFeatures,
   handleDrawCreateEvent,
   handleDrawDeleteEvent,
   handleDrawUpdateEvent,
   MapLibreSource,
-  updatePolygons,
+  updatePolygonsOnMap,
   updateSourcesAndLayers,
 } from './component-utils';
 
-// const appIcons = [
-//   [require('./assets/red.png'), 'RED'],
-//   [require('./assets/blue.png'), 'BLUE'],
-//   [require('./assets/white.png'), 'WHITE'],
-// ] as Array<[img: any, name: string]>;
+const appIcons = [
+  [require('./assets/red.png'), 'RED'],
+  [require('./assets/blue.png'), 'BLUE'],
+  [require('./assets/white.png'), 'WHITE'],
+] as Array<[img: any, name: string]>;
 // import red from './assets/red.png';
 // import blue from './assets/blue.png';
 // import white from './assets/white.png';
@@ -75,7 +76,7 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
     onupdate: ({ attrs: { sources, polygons } }) => {
       console.log('component element updated');
       console.log(map.getStyle());
-      updatePolygons(polygons, draw);
+      updatePolygonsOnMap(polygons, draw);
       updateSourcesAndLayers(sources, map);
     },
     view: ({ attrs: { style = 'height: 400px', className } }) => {
@@ -89,12 +90,12 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
         zoom: zoom || 15.99,
         maxZoom: maxZoom || 15.99,
       });
-      // appIcons.forEach(([image, name]) => {
-      //   map.loadImage(image, (error, img) => {
-      //     if (error) throw error;
-      //     if (!map.hasImage(name)) map.addImage(name, img as ImageBitmap);
-      //   });
-      // });
+      appIcons.forEach(([image, name]) => {
+        map.loadImage(image, (error, img) => {
+          if (error) throw error;
+          if (!map.hasImage(name)) map.addImage(name, img as ImageBitmap);
+        });
+      });
       draw = new MapboxDraw({
         displayControlsDefault: false,
         controls: {
@@ -111,34 +112,34 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
         });
         map.on('draw.update', ({ features }) => handleDrawUpdateEvent(features, polygons));
         map.on('draw.delete', ({ features }) => handleDrawDeleteEvent(draw, features, polygons));
-
-        updatePolygons(polygons, draw);
+        updatePolygonsOnMap(polygons, draw);
         updateSourcesAndLayers(sources, map);
+        addMapListenersForMovingFeatures(map, sources);
 
         console.log(map.getStyle());
 
-        map.addSource('TEST', {
-          type: 'geojson',
-          data: {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'Point',
-              coordinates: [4.327293, 52.109],
-            },
-          },
-        });
-        map.addLayer({
-          id: 'TESTLAYERID',
-          type: 'circle',
-          source: 'TEST',
-          layout: {},
-          paint: {
-            'circle-radius': 15,
-            'circle-color': '#32a852',
-          },
-          filter: ['all'],
-        });
+        // map.addSource('TEST', {
+        //   type: 'geojson',
+        //   data: {
+        //     type: 'Feature',
+        //     properties: {},
+        //     geometry: {
+        //       type: 'Point',
+        //       coordinates: [4.327293, 52.109],
+        //     },
+        //   },
+        // });
+        // map.addLayer({
+        //   id: 'TESTLAYERID',
+        //   type: 'circle',
+        //   source: 'TEST',
+        //   layout: {},
+        //   paint: {
+        //     'circle-radius': 15,
+        //     'circle-color': '#32a852',
+        //   },
+        //   filter: ['all'],
+        // });
       });
     },
   };

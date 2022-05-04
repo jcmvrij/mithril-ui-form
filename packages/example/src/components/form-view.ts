@@ -236,64 +236,88 @@ export const FormView = () => {
       },
       sources: [
         {
-          id: 'TeamBlue',
+          id: 'TeamBlueUnit1',
           source: {
             type: 'FeatureCollection',
             features: [
               {
                 type: 'Feature',
-                properties: {},
+                properties: {
+                  movable: true,
+                },
                 geometry: {
                   type: 'Point',
                   coordinates: [4.327293, 52.11],
-                },
-              },
-              {
-                type: 'Feature',
-                properties: {},
-                geometry: {
-                  type: 'Point',
-                  coordinates: [4.327293, 52.114],
                 },
               },
             ],
           },
           layers: [
             {
-              id: 'testLayer',
-              type: 'circle',
-              layout: {},
-              // type: 'symbol',
-              // layout: {
-              //   'icon-image': 'cat',
-              //   'icon-size': 0.2,
-              //   'icon-allow-overlap': true,
-              // },
+              id: 'Layer',
+              // type: 'circle',
+              // layout: {},
+              type: 'symbol',
+              layout: {
+                'icon-image': 'BLUE',
+                'icon-size': ['interpolate', ['exponential', 0.5], ['zoom'], 15, 0.7, 20, 0.2],
+                'icon-allow-overlap': true,
+              },
               paint: {
-                // 'circle-radius': 15,
-                'circle-radius': ['interpolate', ['exponential', 0.5], ['zoom'], 15, 30, 20, 5],
-                'circle-color': '#3887be',
+                // 'circle-radius': ['interpolate', ['exponential', 0.5], ['zoom'], 15, 30, 20, 5],
+                // 'circle-color': '#3887be',
               },
               filter: ['all'],
             },
           ],
         },
         {
-          id: 'TeamRed',
+          id: 'TeamRedUnit1',
           source: {
             type: 'FeatureCollection',
             features: [
               {
                 type: 'Feature',
-                properties: {},
+                properties: {
+                  movable: true,
+                },
                 geometry: {
                   type: 'Point',
                   coordinates: [4.327293, 52.111],
                 },
               },
+            ],
+          },
+          layers: [
+            {
+              id: 'Layer',
+              // type: 'circle',
+              // layout: {},
+              type: 'symbol',
+              layout: {
+                'icon-image': 'RED',
+                'icon-size': ['interpolate', ['exponential', 0.5], ['zoom'], 15, 0.7, 20, 0.2],
+                'icon-allow-overlap': true,
+              },
+              paint: {
+                // 'circle-radius': 15,
+                // 'circle-color': '#eb4034',
+              },
+              filter: ['all'],
+            },
+          ],
+        },
+
+        {
+          id: 'TeamWhiteUnit1',
+          source: {
+            type: 'FeatureCollection',
+            features: [
               {
                 type: 'Feature',
-                properties: {},
+                properties: {
+                  movable: true,
+                },
                 geometry: {
                   type: 'Point',
                   coordinates: [4.327293, 52.112],
@@ -303,19 +327,20 @@ export const FormView = () => {
           },
           layers: [
             {
-              id: 'testLayer',
-              type: 'circle',
-              layout: {},
-              // type: 'symbol',
-              // layout: {
-              //   'icon-image': 'cat',
-              //   'icon-size': 0.2,
-              //   'icon-allow-overlap': true,
-              // },
+              id: 'Layer',
+              // type: 'circle',
+              // layout: {},
+              type: 'symbol',
+              layout: {
+                'icon-image': 'WHITE',
+                'icon-size': ['interpolate', ['exponential', 0.5], ['zoom'], 15, 0.7, 20, 0.2],
+                'icon-allow-overlap': true,
+              },
               paint: {
                 // 'circle-radius': 15,
-                'circle-radius': ['interpolate', ['exponential', 0.5], ['zoom'], 15, 30, 20, 5],
-                'circle-color': '#eb4034',
+                // 'circle-color': '#ffffff',
+                // 'circle-stroke-color': '#eb4034',
+                // 'circle-stroke-width': 1,
               },
               filter: ['all'],
             },
