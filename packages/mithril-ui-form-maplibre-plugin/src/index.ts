@@ -2,7 +2,7 @@ import m from 'mithril';
 import { PluginType } from 'mithril-ui-form-plugin';
 import { MaplibreMap } from './component';
 import { FeatureCollection } from 'geojson';
-import { MapLibreSource } from './component-utils';
+import { IMapLibreSource } from './component-utils';
 
 export const maplibrePlugin: PluginType = () => {
   return {
@@ -14,7 +14,7 @@ export const maplibrePlugin: PluginType = () => {
 
       const id = props.id || '';
       const className = field.className || 'col s12';
-      const sources: MapLibreSource = iv.sources || {};
+      const sources: IMapLibreSource = iv.sources || {};
       const polygons: FeatureCollection = iv.polygons || {};
       const drawnPolygonLimit = field.drawnPolygonLimit || 1;
 

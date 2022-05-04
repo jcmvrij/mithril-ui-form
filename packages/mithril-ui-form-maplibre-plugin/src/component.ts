@@ -16,7 +16,7 @@ import {
   handleDrawCreateEvent,
   handleDrawDeleteEvent,
   handleDrawUpdateEvent,
-  MapLibreSource,
+  IMapLibreSource,
   updatePolygonsOnMap,
   updateSourcesAndLayers,
 } from './component-utils';
@@ -37,7 +37,7 @@ const appIcons = [
 
 export interface IMaplibreMap extends Attributes {
   id?: string;
-  source?: MapLibreSource;
+  source?: IMapLibreSource;
   drawnPolygonLimit?: number;
   style?: StyleSpecification | string;
   center?: LngLatLike;
@@ -68,16 +68,17 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
   let componentid: string | HTMLElement;
   let map: DrawableMap;
   let draw: MapboxDraw;
+  let canvas: HTMLElement;
 
   return {
     oninit: ({ attrs: { id } }) => {
       componentid = id || uniqueId();
     },
     onupdate: ({ attrs: { sources, polygons } }) => {
-      console.log('component element updated');
-      console.log(map.getStyle());
+      console.log('component update triggered');
       updatePolygonsOnMap(polygons, draw);
-      updateSourcesAndLayers(sources, map);
+      updateSourcesAndLayers(sources, map, canvas);
+      console.log(map.getStyle());
     },
     view: ({ attrs: { style = 'height: 400px', className } }) => {
       return m(`div[id=${componentid}]`, { style, className });
@@ -112,11 +113,10 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
         });
         map.on('draw.update', ({ features }) => handleDrawUpdateEvent(features, polygons));
         map.on('draw.delete', ({ features }) => handleDrawDeleteEvent(draw, features, polygons));
+        canvas = map.getCanvasContainer();
         updatePolygonsOnMap(polygons, draw);
-        updateSourcesAndLayers(sources, map);
-        addMapListenersForMovingFeatures(map, sources);
-
-        console.log(map.getStyle());
+        updateSourcesAndLayers(sources, map, canvas);
+        addMapListenersForMovingFeatures(map, sources, canvas);
 
         // map.addSource('TEST', {
         //   type: 'geojson',
