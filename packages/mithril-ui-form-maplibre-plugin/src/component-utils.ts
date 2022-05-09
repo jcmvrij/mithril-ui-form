@@ -91,6 +91,7 @@ export const addMapListenersForMovingFeatures = (
     const topFeatureAtClick = map.queryRenderedFeatures(e.point)[0];
     if (topFeatureAtClick.properties.movable) {
       e.preventDefault();
+      map.moveLayer(topFeatureAtClick.layer.id);
       canvas.style.cursor = 'grab';
       const eventsWhenMouseDownAndMove = (e: MapLayerMouseEvent) => {
         const coordinates = e.lngLat;

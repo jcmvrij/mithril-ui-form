@@ -75,10 +75,8 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
       componentid = id || uniqueId();
     },
     onupdate: ({ attrs: { sources, polygons } }) => {
-      console.log('component update triggered');
       updatePolygons(polygons, draw);
       updateSourcesAndLayers(sources, map, canvas);
-      console.log(map.getStyle());
     },
     view: ({ attrs: { style = 'height: 400px', className } }) => {
       return m(`div[id=${componentid}]`, { style, className });
