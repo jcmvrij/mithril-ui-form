@@ -17,7 +17,7 @@ import {
   handleDrawDeleteEvent,
   handleDrawUpdateEvent,
   IMapLibreSource,
-  updatePolygonsOnMap,
+  updatePolygons,
   updateSourcesAndLayers,
 } from './component-utils';
 
@@ -76,7 +76,7 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
     },
     onupdate: ({ attrs: { sources, polygons } }) => {
       console.log('component update triggered');
-      updatePolygonsOnMap(polygons, draw);
+      updatePolygons(polygons, draw);
       updateSourcesAndLayers(sources, map, canvas);
       console.log(map.getStyle());
     },
@@ -112,34 +112,11 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
           handleDrawCreateEvent(draw, features, polygons, drawnPolygonLimit);
         });
         map.on('draw.update', ({ features }) => handleDrawUpdateEvent(features, polygons));
-        map.on('draw.delete', ({ features }) => handleDrawDeleteEvent(draw, features, polygons));
+        map.on('draw.delete', ({ features }) => handleDrawDeleteEvent(features, polygons));
         canvas = map.getCanvasContainer();
-        updatePolygonsOnMap(polygons, draw);
+        updatePolygons(polygons, draw);
         updateSourcesAndLayers(sources, map, canvas);
         addMapListenersForMovingFeatures(map, sources, canvas);
-
-        // map.addSource('TEST', {
-        //   type: 'geojson',
-        //   data: {
-        //     type: 'Feature',
-        //     properties: {},
-        //     geometry: {
-        //       type: 'Point',
-        //       coordinates: [4.327293, 52.109],
-        //     },
-        //   },
-        // });
-        // map.addLayer({
-        //   id: 'TESTLAYERID',
-        //   type: 'circle',
-        //   source: 'TEST',
-        //   layout: {},
-        //   paint: {
-        //     'circle-radius': 15,
-        //     'circle-color': '#32a852',
-        //   },
-        //   filter: ['all'],
-        // });
       });
     },
   };

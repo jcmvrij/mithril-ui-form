@@ -7,11 +7,6 @@ import { IMapLibreSource } from './component-utils';
 export const maplibrePlugin: PluginType = () => {
   return {
     view: ({ attrs: { iv, props, field } }) => {
-      // console.log('pluginlog = ');
-      // console.log(iv);
-      // console.log(props);
-      // console.log(field);
-
       const id = props.id || '';
       const className = field.className || 'col s12';
       const sources: IMapLibreSource = iv.sources || {};
@@ -19,11 +14,11 @@ export const maplibrePlugin: PluginType = () => {
       const drawnPolygonLimit = field.drawnPolygonLimit || 1;
 
       return m(MaplibreMap, {
-        id: id,
-        className: className,
-        sources: sources,
-        polygons: polygons,
-        drawnPolygonLimit: drawnPolygonLimit,
+        id,
+        className,
+        sources,
+        polygons,
+        drawnPolygonLimit,
       });
     },
   };
