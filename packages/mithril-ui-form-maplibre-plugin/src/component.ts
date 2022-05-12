@@ -1,5 +1,4 @@
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import 'maplibre-gl/dist/maplibre-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import maplibregl, {
   GeoJSONFeature,
@@ -10,9 +9,11 @@ import maplibregl, {
   MapLayerEventType,
   StyleSpecification,
 } from 'maplibre-gl';
+import 'maplibre-gl/dist/maplibre-gl.css';
 import m, { Attributes, FactoryComponent } from 'mithril';
 import {
   addMapListenersForMovingFeatures,
+  generateGradientIcon,
   handleDrawCreateEvent,
   handleDrawDeleteEvent,
   handleDrawUpdateEvent,
@@ -20,20 +21,6 @@ import {
   updatePolygons,
   updateSourcesAndLayers,
 } from './component-utils';
-
-const appIcons = [
-  [require('./assets/red.png'), 'RED'],
-  [require('./assets/blue.png'), 'BLUE'],
-  [require('./assets/white.png'), 'WHITE'],
-] as Array<[img: any, name: string]>;
-// import red from './assets/red.png';
-// import blue from './assets/blue.png';
-// import white from './assets/white.png';
-// const appIcons = [
-//   [red, 'RED'],
-//   [blue, 'BLUE'],
-//   [white, 'WHITE'],
-// ] as Array<[img: any, name: string]>;
 
 export interface IMaplibreMap extends Attributes {
   id?: string;
@@ -65,36 +52,38 @@ declare interface DrawableMap {
 class DrawableMap extends maplibregl.Map {}
 
 export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
-  let componentid: string | HTMLElement;
+  let componentId: string | HTMLElement;
   let map: DrawableMap;
   let draw: MapboxDraw;
   let canvas: HTMLElement;
 
   return {
     oninit: ({ attrs: { id } }) => {
-      componentid = id || uniqueId();
+      componentId = id || uniqueId();
     },
     onupdate: ({ attrs: { sources, polygons } }) => {
       updatePolygons(polygons, draw);
       updateSourcesAndLayers(sources, map, canvas);
     },
     view: ({ attrs: { style = 'height: 400px', className } }) => {
-      return m(`div[id=${componentid}]`, { style, className });
+      return m(`div[id=${componentId}]`, { style, className });
     },
-    oncreate: ({ attrs: { style, center, zoom, maxZoom, sources, polygons, drawnPolygonLimit } }) => {
+    oncreate: ({ attrs: { style, center, zoom, maxZoom, sources, polygons, drawnPolygonLimit, appIcons } }) => {
       map = new maplibregl.Map({
-        container: componentid,
+        container: componentId,
         style: style || 'https://geodata.nationaalgeoregister.nl/beta/topotiles-viewer/styles/achtergrond.json',
         center: center || [4.327, 52.11],
         zoom: zoom || 15.99,
         maxZoom: maxZoom || 15.99,
       });
-      appIcons.forEach(([image, name]) => {
-        map.loadImage(image, (error, img) => {
-          if (error) throw error;
-          if (!map.hasImage(name)) map.addImage(name, img as ImageBitmap);
+      if (appIcons) {
+        (appIcons as Array<[img: any, name: string]>).forEach(([image, name]) => {
+          map.loadImage(image, (error, img) => {
+            if (error) throw error;
+            if (!map.hasImage(name)) map.addImage(name, img as ImageBitmap);
+          });
         });
-      });
+      }
       draw = new MapboxDraw({
         displayControlsDefault: false,
         controls: {
@@ -104,17 +93,22 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
       });
       // @ts-ignore
       map.addControl(draw as IControl, 'top-left');
+      map.on('draw.create', ({ features }) => {
+        handleDrawCreateEvent(draw, features, polygons, drawnPolygonLimit);
+      });
+      map.on('draw.update', ({ features }) => handleDrawUpdateEvent(features, polygons));
+      map.on('draw.delete', ({ features }) => handleDrawDeleteEvent(features, polygons));
+
+      map.on('styleimagemissing', (e) => {
+        map.addImage(e.id, generateGradientIcon());
+      });
+
+      canvas = map.getCanvasContainer();
+      addMapListenersForMovingFeatures(map, sources, canvas);
 
       map.once('load', () => {
-        map.on('draw.create', ({ features }) => {
-          handleDrawCreateEvent(draw, features, polygons, drawnPolygonLimit);
-        });
-        map.on('draw.update', ({ features }) => handleDrawUpdateEvent(features, polygons));
-        map.on('draw.delete', ({ features }) => handleDrawDeleteEvent(features, polygons));
-        canvas = map.getCanvasContainer();
         updatePolygons(polygons, draw);
         updateSourcesAndLayers(sources, map, canvas);
-        addMapListenersForMovingFeatures(map, sources, canvas);
       });
     },
   };

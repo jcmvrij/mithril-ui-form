@@ -255,8 +255,6 @@ export const FormView = () => {
           layers: [
             {
               id: 'Layer',
-              // type: 'circle',
-              // layout: {},
               type: 'symbol',
               layout: {
                 'icon-image': 'BLUE',
@@ -265,8 +263,6 @@ export const FormView = () => {
               },
               paint: {
                 'icon-opacity': 0.8,
-                // 'circle-radius': ['interpolate', ['exponential', 0.5], ['zoom'], 15, 30, 20, 5],
-                // 'circle-color': '#3887be',
               },
               filter: ['all'],
             },
@@ -292,8 +288,6 @@ export const FormView = () => {
           layers: [
             {
               id: 'Layer',
-              // type: 'circle',
-              // layout: {},
               type: 'symbol',
               layout: {
                 'icon-image': 'RED',
@@ -302,8 +296,6 @@ export const FormView = () => {
               },
               paint: {
                 'icon-opacity': 0.8,
-                // 'circle-radius': 15,
-                // 'circle-color': '#eb4034',
               },
               filter: ['all'],
             },
@@ -330,20 +322,13 @@ export const FormView = () => {
           layers: [
             {
               id: 'Layer',
-              // type: 'circle',
-              // layout: {},
               type: 'symbol',
               layout: {
                 'icon-image': 'WHITE',
                 'icon-size': ['interpolate', ['exponential', 0.5], ['zoom'], 15, 0.7, 20, 0.2],
                 'icon-allow-overlap': true,
               },
-              paint: {
-                // 'circle-radius': 15,
-                // 'circle-color': '#ffffff',
-                // 'circle-stroke-color': '#eb4034',
-                // 'circle-stroke-width': 1,
-              },
+              paint: {},
               filter: ['all'],
             },
           ],
