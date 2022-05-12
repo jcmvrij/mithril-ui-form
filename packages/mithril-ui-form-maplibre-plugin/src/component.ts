@@ -1,5 +1,3 @@
-import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 import maplibregl, {
   GeoJSONFeature,
   Listener,
@@ -9,7 +7,6 @@ import maplibregl, {
   MapLayerEventType,
   StyleSpecification,
 } from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
 import m, { Attributes, FactoryComponent } from 'mithril';
 import {
   addMapListenersForMovingFeatures,
@@ -68,7 +65,9 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
     view: ({ attrs: { style = 'height: 400px', className } }) => {
       return m(`div[id=${componentId}]`, { style, className });
     },
-    oncreate: ({ attrs: { style, center, zoom, maxZoom, sources, polygons, drawnPolygonLimit, appIcons } }) => {
+    oncreate: ({
+      attrs: { maplibregl, mapboxdraw, style, center, zoom, maxZoom, sources, polygons, drawnPolygonLimit, appIcons },
+    }) => {
       map = new maplibregl.Map({
         container: componentId,
         style: style || 'https://geodata.nationaalgeoregister.nl/beta/topotiles-viewer/styles/achtergrond.json',
@@ -84,7 +83,7 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
           });
         });
       }
-      draw = new MapboxDraw({
+      draw = new mapboxdraw({
         displayControlsDefault: false,
         controls: {
           polygon: true,

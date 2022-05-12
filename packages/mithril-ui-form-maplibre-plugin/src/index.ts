@@ -4,10 +4,17 @@ import { MaplibreMap } from './component';
 import { FeatureCollection } from 'geojson';
 import { IMapLibreSource } from './component-utils';
 
+let maplibregl: any;
+let mapboxdraw: any;
 let appIcons: Array<[img: any, name: string]>;
 
-export const loadIcons = (icons: Array<[img: any, name: string]>) => {
-  appIcons = icons;
+export const configureMaplibrePlugin = (
+  dependencies: { maplibregl: any; mapboxdraw: any },
+  icons?: Array<[img: any, name: string]>
+) => {
+  maplibregl = dependencies.maplibregl;
+  mapboxdraw = dependencies.mapboxdraw;
+  if (icons) appIcons = icons;
 };
 
 export const maplibrePlugin: PluginType = () => {
@@ -20,6 +27,8 @@ export const maplibrePlugin: PluginType = () => {
       const drawnPolygonLimit: number = field.drawnPolygonLimit || 1;
 
       return m(MaplibreMap, {
+        maplibregl,
+        mapboxdraw,
         id,
         className,
         sources,
