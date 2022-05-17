@@ -68,7 +68,9 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
     view: ({ attrs: { style = 'height: 400px', className } }) => {
       return m(`div[id=${componentId}]`, { style, className });
     },
-    oncreate: ({ attrs: { style, center, zoom, maxZoom, sources, polygons, drawnPolygonLimit, appIcons } }) => {
+    oncreate: ({
+      attrs: { style, center, zoom, maxZoom, sources, polygons, drawnPolygonTools, drawnPolygonLimit, appIcons },
+    }) => {
       map = new maplibregl.Map({
         container: componentId,
         style: style || 'https://geodata.nationaalgeoregister.nl/beta/topotiles-viewer/styles/achtergrond.json',
@@ -84,15 +86,17 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
           });
         });
       }
-      draw = new MapboxDraw({
-        displayControlsDefault: false,
-        controls: {
-          polygon: true,
-          trash: true,
-        },
-      });
-      // @ts-ignore
-      map.addControl(draw as IControl, 'top-left');
+      if (drawnPolygonTools) {
+        draw = new MapboxDraw({
+          displayControlsDefault: false,
+          controls: {
+            polygon: true,
+            trash: true,
+          },
+        });
+        // @ts-ignore
+        map.addControl(draw as IControl, 'top-left');
+      }
       map.on('draw.create', ({ features }) => {
         handleDrawCreateEvent(draw, features, polygons, drawnPolygonLimit);
       });

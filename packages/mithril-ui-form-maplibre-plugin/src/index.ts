@@ -18,6 +18,7 @@ export const maplibrePlugin: PluginType = () => {
       const className = field.className || 'col s12';
       const sources: IMapLibreSource[] = iv.sources;
       const polygons: FeatureCollection = iv.polygons;
+      const drawnPolygonTools: boolean = field.drawnPolygonTools;
       const drawnPolygonLimit: number = field.drawnPolygonLimit || 0;
 
       return m(MaplibreMap, {
@@ -25,6 +26,7 @@ export const maplibrePlugin: PluginType = () => {
         className,
         sources,
         polygons,
+        drawnPolygonTools,
         drawnPolygonLimit,
         appIcons,
       });
