@@ -23,8 +23,14 @@ export const handleDrawCreateEvent = (
   polygons: FeatureCollection,
   drawnPolygonLimit: number | undefined
 ) => {
+  if (!polygons) {
+    polygons = {
+      type: 'FeatureCollection',
+      features: [],
+    };
+  }
   polygons.features.push(features[0]);
-  if (drawnPolygonLimit && drawnPolygonLimit !== 0 && polygons.features.length > drawnPolygonLimit) {
+  if (drawnPolygonLimit && drawnPolygonLimit > 0 && polygons.features.length > drawnPolygonLimit) {
     const oldestPolygonId = polygons.features[0].id?.toString();
     if (oldestPolygonId) draw.delete(oldestPolygonId);
     polygons.features.shift();
@@ -47,39 +53,41 @@ export const updatePolygons = (polygons: FeatureCollection, draw: MapboxDraw) =>
 };
 
 export const updateSourcesAndLayers = (sources: IMapLibreSource[], map: maplibregl.Map, canvas: HTMLElement) => {
-  sources.forEach((source: IMapLibreSource) => {
-    if (!map.getSource(source.id)) {
-      map.addSource(source.id, {
-        type: 'geojson',
-        data: source.source,
-      });
-    } else {
-      (map.getSource(source.id) as GeoJSONSource).setData(source.source);
-    }
-
-    source.layers.forEach((layer) => {
-      const layerId = source.id + layer.id;
-      if (!map.getLayer(layerId)) {
-        map.addLayer({
-          id: layerId,
-          // @ts-ignore
-          type: layer.type,
-          source: source.id,
-          layout: layer.layout,
-          // @ts-ignore
-          paint: layer.paint,
-          filter: layer.filter,
+  if (sources) {
+    sources.forEach((source: IMapLibreSource) => {
+      if (!map.getSource(source.id)) {
+        map.addSource(source.id, {
+          type: 'geojson',
+          data: source.source,
         });
-
-        map.on('mouseenter', layerId, () => {
-          canvas.style.cursor = 'move';
-        });
-        map.on('mouseleave', layerId, () => {
-          canvas.style.cursor = '';
-        });
+      } else {
+        (map.getSource(source.id) as GeoJSONSource).setData(source.source);
       }
+
+      source.layers.forEach((layer) => {
+        const layerId = source.id + layer.id;
+        if (!map.getLayer(layerId)) {
+          map.addLayer({
+            id: layerId,
+            // @ts-ignore
+            type: layer.type,
+            source: source.id,
+            layout: layer.layout,
+            // @ts-ignore
+            paint: layer.paint,
+            filter: layer.filter,
+          });
+
+          map.on('mouseenter', layerId, () => {
+            canvas.style.cursor = 'move';
+          });
+          map.on('mouseleave', layerId, () => {
+            canvas.style.cursor = '';
+          });
+        }
+      });
     });
-  });
+  }
 };
 
 export const addMapListenersForMovingFeatures = (
@@ -87,42 +95,44 @@ export const addMapListenersForMovingFeatures = (
   sources: IMapLibreSource[],
   canvas: HTMLElement
 ) => {
-  map.on('mousedown', (e) => {
-    const topFeatureAtClick = map.queryRenderedFeatures(e.point)[0];
-    if (topFeatureAtClick.properties.movable) {
-      e.preventDefault();
-      map.moveLayer(topFeatureAtClick.layer.id);
-      canvas.style.cursor = 'grab';
-      const eventsWhenMouseDownAndMove = (e: MapLayerMouseEvent) => {
-        const coordinates = e.lngLat;
-        canvas.style.cursor = 'grabbing';
-        // update map when moving
-        (map.getSource(topFeatureAtClick.source) as GeoJSONSource).setData({
-          type: 'FeatureCollection',
-          features: [
-            {
-              type: 'Feature',
-              properties: {},
-              geometry: {
-                type: 'Point',
-                coordinates: [coordinates.lng, coordinates.lat],
+  if (sources) {
+    map.on('mousedown', (e) => {
+      const topFeatureAtClick = map.queryRenderedFeatures(e.point)[0];
+      if (topFeatureAtClick.properties.movable) {
+        e.preventDefault();
+        map.moveLayer(topFeatureAtClick.layer.id);
+        canvas.style.cursor = 'grab';
+        const eventsWhenMouseDownAndMove = (e: MapLayerMouseEvent) => {
+          const coordinates = e.lngLat;
+          canvas.style.cursor = 'grabbing';
+          // update map when moving
+          (map.getSource(topFeatureAtClick.source) as GeoJSONSource).setData({
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                properties: {},
+                geometry: {
+                  type: 'Point',
+                  coordinates: [coordinates.lng, coordinates.lat],
+                },
               },
-            },
-          ],
+            ],
+          });
+        };
+        map.on('mousemove', eventsWhenMouseDownAndMove);
+        map.once('mouseup', (e) => {
+          canvas.style.cursor = '';
+          const coordinates = e.lngLat;
+          // moving stopped, so location of the feature is saved
+          const index = sources.findIndex((source) => source.id === topFeatureAtClick.source);
+          (sources[index].source.features[0].geometry as Point).coordinates = [coordinates.lng, coordinates.lat];
+          map.off('mousemove', eventsWhenMouseDownAndMove);
+          m.redraw();
         });
-      };
-      map.on('mousemove', eventsWhenMouseDownAndMove);
-      map.once('mouseup', (e) => {
-        canvas.style.cursor = '';
-        const coordinates = e.lngLat;
-        // moving stopped, so location of the feature is saved
-        const index = sources.findIndex((source) => source.id === topFeatureAtClick.source);
-        (sources[index].source.features[0].geometry as Point).coordinates = [coordinates.lng, coordinates.lat];
-        map.off('mousemove', eventsWhenMouseDownAndMove);
-        m.redraw();
-      });
-    }
-  });
+      }
+    });
+  }
 };
 
 export const generateGradientIcon = (width = 64) => {

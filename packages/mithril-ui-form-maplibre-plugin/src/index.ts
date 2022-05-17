@@ -16,8 +16,8 @@ export const maplibrePlugin: PluginType = () => {
     view: ({ attrs: { iv, props, field } }) => {
       const id = props.id || '';
       const className = field.className || 'col s12';
-      const sources: IMapLibreSource[] = iv.sources || {};
-      const polygons: FeatureCollection = iv.polygons || {};
+      const sources: IMapLibreSource[] = iv.sources;
+      const polygons: FeatureCollection = iv.polygons;
       const drawnPolygonLimit: number = field.drawnPolygonLimit || 0;
 
       return m(MaplibreMap, {
