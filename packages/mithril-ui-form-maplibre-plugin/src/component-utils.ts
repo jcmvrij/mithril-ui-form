@@ -1,6 +1,34 @@
 import m from 'mithril';
-import { GeoJSONFeature, GeoJSONSource, LayerSpecification, MapLayerMouseEvent } from 'maplibre-gl';
+import maplibregl, {
+  GeoJSONFeature,
+  GeoJSONSource,
+  LayerSpecification,
+  Listener,
+  MapEvent,
+  MapEventType,
+  MapLayerEventType,
+  MapLayerMouseEvent,
+} from 'maplibre-gl';
 import { FeatureCollection, Point } from 'geojson';
+
+declare type MapLayerEventTypeDrawExtended = MapLayerEventType & {
+  'draw.create': (e: { type: string; features: GeoJSONFeature[] }) => void;
+  'draw.update': (e: { type: string; features: GeoJSONFeature[] }) => void;
+  'draw.delete': (e: { type: string; features: GeoJSONFeature[] }) => void;
+};
+
+export declare interface DrawableMap {
+  on(type: MapEvent, listener: Listener): this;
+  on<T extends keyof MapEventType>(type: T, listener: (ev: MapEventType[T] & Object) => void): this;
+  on<U extends keyof MapLayerEventTypeDrawExtended>(event: U, listener: MapLayerEventTypeDrawExtended[U]): this;
+  on<T extends keyof MapLayerEventTypeDrawExtended>(
+    type: T,
+    layer: string,
+    listener: (ev: MapLayerEventTypeDrawExtended[T]) => void
+  ): this;
+}
+
+export class DrawableMap extends maplibregl.Map {}
 
 interface IMapLibreLayer {
   id: string;
