@@ -125,8 +125,7 @@ export const addMapListenersForMovingFeatures = (
   });
 };
 
-export const generateGradientIcon = () => {
-  const width = 64; // The image will be 64 pixels square
+export const generateGradientIcon = (width = 64) => {
   const bytesPerPixel = 4; // Each pixel is represented by 4 bytes: red, green, blue, and alpha.
   const data = new Uint8Array(width * width * bytesPerPixel);
 
