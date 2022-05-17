@@ -6,8 +6,9 @@ import { IMapLibreSource } from './component-utils';
 
 let appIcons: Array<[img: any, name: string]>;
 
-export const loadIcons = (icons: Array<[img: any, name: string]>) => {
-  appIcons = icons;
+export const maplibrePluginWithIcons = (icons?: Array<[img: any, name: string]>) => {
+  if (icons) appIcons = icons;
+  return maplibrePlugin;
 };
 
 export const maplibrePlugin: PluginType = () => {
@@ -17,7 +18,7 @@ export const maplibrePlugin: PluginType = () => {
       const className = field.className || 'col s12';
       const sources: IMapLibreSource[] = iv.sources || {};
       const polygons: FeatureCollection = iv.polygons || {};
-      const drawnPolygonLimit: number = field.drawnPolygonLimit || 1;
+      const drawnPolygonLimit: number = field.drawnPolygonLimit || 0;
 
       return m(MaplibreMap, {
         id,

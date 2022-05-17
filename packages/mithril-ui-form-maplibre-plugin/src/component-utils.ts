@@ -24,7 +24,7 @@ export const handleDrawCreateEvent = (
   drawnPolygonLimit: number | undefined
 ) => {
   polygons.features.push(features[0]);
-  if (drawnPolygonLimit && polygons.features.length > drawnPolygonLimit) {
+  if (drawnPolygonLimit && drawnPolygonLimit !== 0 && polygons.features.length > drawnPolygonLimit) {
     const oldestPolygonId = polygons.features[0].id?.toString();
     if (oldestPolygonId) draw.delete(oldestPolygonId);
     polygons.features.shift();
