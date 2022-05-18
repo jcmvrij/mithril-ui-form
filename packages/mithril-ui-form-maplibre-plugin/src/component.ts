@@ -61,15 +61,15 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
     oninit: ({ attrs: { id } }) => {
       componentId = id || uniqueId();
     },
-    onupdate: ({ attrs: { sources, polygons } }) => {
-      updatePolygons(polygons, draw);
+    onupdate: ({ attrs: { sources, drawingPolygons, polygons } }) => {
+      if (drawingPolygons) updatePolygons(polygons, draw);
       updateSourcesAndLayers(sources, map, canvas);
     },
     view: ({ attrs: { style = 'height: 400px', className } }) => {
       return m(`div[id=${componentId}]`, { style, className });
     },
     oncreate: ({
-      attrs: { style, center, zoom, maxZoom, sources, polygons, drawnPolygonTools, drawnPolygonLimit, appIcons },
+      attrs: { style, center, zoom, maxZoom, sources, polygons, drawingPolygons, drawnPolygonLimit, appIcons },
     }) => {
       map = new maplibregl.Map({
         container: componentId,
@@ -86,7 +86,7 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
           });
         });
       }
-      if (drawnPolygonTools) {
+      if (drawingPolygons) {
         draw = new MapboxDraw({
           displayControlsDefault: false,
           controls: {
@@ -111,7 +111,7 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
       addMapListenersForMovingFeatures(map, sources, canvas);
 
       map.once('load', () => {
-        updatePolygons(polygons, draw);
+        if (drawingPolygons) updatePolygons(polygons, draw);
         updateSourcesAndLayers(sources, map, canvas);
       });
     },

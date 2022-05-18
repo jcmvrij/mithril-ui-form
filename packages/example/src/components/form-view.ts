@@ -152,7 +152,7 @@ You can also include _markdown_ in your UIForm.`,
   {
     id: 'libremap',
     type: 'libremap',
-    drawnPolygonTools: true,
+    drawingPolygons: false,
     drawnPolygonLimit: 1,
     required: true,
     className: 'col s12',

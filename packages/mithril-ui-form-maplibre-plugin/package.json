@@ -1,6 +1,6 @@
 {
   "name": "mithril-ui-form-maplibre-plugin",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "See README",
   "main": "lib/index.js",
   "module": "lib/index.esm.js",

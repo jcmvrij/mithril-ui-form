@@ -23,12 +23,6 @@ export const handleDrawCreateEvent = (
   polygons: FeatureCollection,
   drawnPolygonLimit: number | undefined
 ) => {
-  if (!polygons) {
-    polygons = {
-      type: 'FeatureCollection',
-      features: [],
-    };
-  }
   polygons.features.push(features[0]);
   if (drawnPolygonLimit && drawnPolygonLimit > 0 && polygons.features.length > drawnPolygonLimit) {
     const oldestPolygonId = polygons.features[0].id?.toString();
@@ -105,7 +99,7 @@ export const addMapListenersForMovingFeatures = (
         const eventsWhenMouseDownAndMove = (e: MapLayerMouseEvent) => {
           const coordinates = e.lngLat;
           canvas.style.cursor = 'grabbing';
-          // update map when moving
+          // update map when moving feature
           (map.getSource(topFeatureAtClick.source) as GeoJSONSource).setData({
             type: 'FeatureCollection',
             features: [
@@ -124,7 +118,7 @@ export const addMapListenersForMovingFeatures = (
         map.once('mouseup', (e) => {
           canvas.style.cursor = '';
           const coordinates = e.lngLat;
-          // moving stopped, so location of the feature is saved
+          // moving feature stops, last location of the feature is saved
           const index = sources.findIndex((source) => source.id === topFeatureAtClick.source);
           (sources[index].source.features[0].geometry as Point).coordinates = [coordinates.lng, coordinates.lat];
           map.off('mousemove', eventsWhenMouseDownAndMove);
