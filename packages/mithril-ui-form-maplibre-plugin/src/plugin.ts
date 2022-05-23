@@ -39,7 +39,7 @@ const maplibrePluginFactory: PluginType = () => {
         sources,
         drawingPolygons,
         drawnPolygonLimit,
-        polygons,
+        polygons: iv.polygons,
         appIcons,
       });
     },
