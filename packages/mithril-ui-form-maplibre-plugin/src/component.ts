@@ -1,5 +1,4 @@
-import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
+import m, { Attributes, FactoryComponent } from 'mithril';
 import maplibregl, {
   GeoJSONFeature,
   Listener,
@@ -9,8 +8,7 @@ import maplibregl, {
   MapLayerEventType,
   StyleSpecification,
 } from 'maplibre-gl';
-import 'maplibre-gl/dist/maplibre-gl.css';
-import m, { Attributes, FactoryComponent } from 'mithril';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import {
   addMapListenersForMovingFeatures,
   generateGradientIcon,
@@ -21,6 +19,9 @@ import {
   updatePolygons,
   updateSourcesAndLayers,
 } from './component-utils';
+
+import 'maplibre-gl/dist/maplibre-gl.css';
+import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
 export interface IMaplibreMap extends Attributes {
   id?: string;
@@ -61,19 +62,19 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
     oninit: ({ attrs: { id } }) => {
       componentId = id || uniqueId();
     },
-    onupdate: ({ attrs: { sources, drawingPolygons, polygons } }) => {
-      if (drawingPolygons) updatePolygons(polygons, draw);
+    onupdate: ({ attrs: { sources, polygons } }) => {
+      if (polygons) updatePolygons(polygons, draw);
       updateSourcesAndLayers(sources, map, canvas);
     },
-    view: ({ attrs: { style = 'height: 400px', className } }) => {
+    view: ({ attrs: { style, className } }) => {
       return m(`div[id=${componentId}]`, { style, className });
     },
     oncreate: ({
-      attrs: { style, center, zoom, maxZoom, sources, polygons, drawingPolygons, drawnPolygonLimit, appIcons },
+      attrs: { mapstyle, center, zoom, maxZoom, sources, polygons, drawingPolygons, drawnPolygonLimit, appIcons },
     }) => {
       map = new maplibregl.Map({
         container: componentId,
-        style: style || 'https://geodata.nationaalgeoregister.nl/beta/topotiles-viewer/styles/achtergrond.json',
+        style: mapstyle || 'https://geodata.nationaalgeoregister.nl/beta/topotiles-viewer/styles/achtergrond.json',
         center: center || [4.327, 52.11],
         zoom: zoom || 15.99,
         maxZoom: maxZoom || 15.99,
@@ -86,7 +87,7 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
           });
         });
       }
-      if (drawingPolygons) {
+      if (polygons || drawingPolygons) {
         draw = new MapboxDraw({
           displayControlsDefault: false,
           controls: {
@@ -96,22 +97,25 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
         });
         // @ts-ignore
         map.addControl(draw as IControl, 'top-left');
+        map.on('draw.create', ({ features }) => {
+          handleDrawCreateEvent(draw, features, polygons, drawnPolygonLimit);
+        });
+        map.on('draw.update', ({ features }) => handleDrawUpdateEvent(features, polygons));
+        map.on('draw.delete', ({ features }) => handleDrawDeleteEvent(features, polygons));
+
+        map.once('load', () => {
+          updatePolygons(polygons, draw);
+        });
       }
-      map.on('draw.create', ({ features }) => {
-        handleDrawCreateEvent(draw, features, polygons, drawnPolygonLimit);
-      });
-      map.on('draw.update', ({ features }) => handleDrawUpdateEvent(features, polygons));
-      map.on('draw.delete', ({ features }) => handleDrawDeleteEvent(features, polygons));
 
       map.on('styleimagemissing', (e) => {
         map.addImage(e.id, generateGradientIcon());
       });
 
       canvas = map.getCanvasContainer();
-      addMapListenersForMovingFeatures(map, sources, canvas);
+      addMapListenersForMovingFeatures(sources, map, canvas);
 
       map.once('load', () => {
-        if (drawingPolygons) updatePolygons(polygons, draw);
         updateSourcesAndLayers(sources, map, canvas);
       });
     },

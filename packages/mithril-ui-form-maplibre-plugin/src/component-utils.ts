@@ -85,8 +85,8 @@ export const updateSourcesAndLayers = (sources: IMapLibreSource[], map: maplibre
 };
 
 export const addMapListenersForMovingFeatures = (
-  map: maplibregl.Map,
   sources: IMapLibreSource[],
+  map: maplibregl.Map,
   canvas: HTMLElement
 ) => {
   if (sources) {
@@ -96,10 +96,10 @@ export const addMapListenersForMovingFeatures = (
         e.preventDefault();
         map.moveLayer(topFeatureAtClick.layer.id);
         canvas.style.cursor = 'grab';
-        const eventsWhenMouseDownAndMove = (e: MapLayerMouseEvent) => {
-          const coordinates = e.lngLat;
+        const eventsWhenMouseDownAndMoving = (e: MapLayerMouseEvent) => {
           canvas.style.cursor = 'grabbing';
-          // update map when moving feature
+          // update only source of map when moving feature
+          const coordinates = e.lngLat;
           (map.getSource(topFeatureAtClick.source) as GeoJSONSource).setData({
             type: 'FeatureCollection',
             features: [
@@ -114,14 +114,14 @@ export const addMapListenersForMovingFeatures = (
             ],
           });
         };
-        map.on('mousemove', eventsWhenMouseDownAndMove);
+        map.on('mousemove', eventsWhenMouseDownAndMoving);
         map.once('mouseup', (e) => {
           canvas.style.cursor = '';
           const coordinates = e.lngLat;
-          // moving feature stops, last location of the feature is saved
+          // moving feature stops, last location of the feature is saved in the source in the application
           const index = sources.findIndex((source) => source.id === topFeatureAtClick.source);
           (sources[index].source.features[0].geometry as Point).coordinates = [coordinates.lng, coordinates.lat];
-          map.off('mousemove', eventsWhenMouseDownAndMove);
+          map.off('mousemove', eventsWhenMouseDownAndMoving);
           m.redraw();
         });
       }

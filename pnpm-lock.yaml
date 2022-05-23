@@ -26,7 +26,7 @@ importers:
       mithril-materialized: ^0.19.4
       mithril-ui-form: workspace:^1.1.8
       mithril-ui-form-leaflet-plugin: workspace:^0.3.0
-      mithril-ui-form-maplibre-plugin: workspace:^0.0.1
+      mithril-ui-form-maplibre-plugin: workspace:^0.1.1
       mithril-ui-form-plugin: workspace:^0.3.3
       mithril-ui-form-rating-plugin: workspace:^0.4.0
       rimraf: ^3.0.2
@@ -2046,7 +2046,7 @@ packages:
     dev: true
 
   /ansi-regex/2.1.1:
-    resolution: {integrity: sha1-w7M6te42DYbg5ijwRorn7yfWVN8=}
+    resolution: {integrity: sha512-TIGnTpdo+E3+pCyAluZvtED5p5wCqLdezCyhPZzKPcxvFplEt4i+W7OONCKgeZFT3+y5NZZfOOS/Bdcanm1MYA==}
     engines: {node: '>=0.10.0'}
     dev: true
 
@@ -2056,7 +2056,7 @@ packages:
     dev: true
 
   /ansi-styles/2.2.1:
-    resolution: {integrity: sha1-tDLdM1i2NM914eRmQ2gkBTPB3b4=}
+    resolution: {integrity: sha512-kmCevFghRiWM7HB5zTPULl4r9bVFSWjz62MhqizDGUrq2NWuNMQyuv4tHHoKJHs69M/MF64lEcHdYIocrdWQYA==}
     engines: {node: '>=0.10.0'}
     dev: true
 
@@ -2320,7 +2320,7 @@ packages:
     dev: true
 
   /callsites/2.0.0:
-    resolution: {integrity: sha1-BuuE8A7qQT2oav/vrL/7Ngk7PFA=}
+    resolution: {integrity: sha512-ksWePWBloaWPxJYQ8TL0JHvtci6G5QTKwQ95RcWAa/lzoAKuAOflGdAK92hpHXjkwb8zLxoLNUoNYZgVsaJzvQ==}
     engines: {node: '>=4'}
     dev: true
 
