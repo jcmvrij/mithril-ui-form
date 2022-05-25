@@ -1,46 +1,57 @@
 import m from 'mithril';
+import { FeatureCollection } from 'geojson';
 import { PluginType } from 'mithril-ui-form-plugin';
-import { MaplibreMap } from './component';
+import { mapLibreMap, pluginState } from './component';
 import { IMapLibreSource } from './component-utils';
 
-let appIcons: Array<[img: any, name: string]>;
+export interface MapLibrePluginOptions {
+  icons?: Array<[img: string, name: string]>;
+  fallbackIcon?: string;
+  mapStyle?: string;
+}
 
-export const maplibrePlugin = (icons?: Array<[img: any, name: string]>) => {
-  if (icons) appIcons = icons;
-  return maplibrePluginFactory;
+// type MapLibrePluginType = PluginType & {
+//   drawingPolygons: boolean;
+//   drawnPolygonLimit: number;
+// };
+
+let options: MapLibrePluginOptions;
+
+export const mapLibrePlugin = (mapLibrePluginOptions?: MapLibrePluginOptions) => {
+  if (mapLibrePluginOptions) options = mapLibrePluginOptions;
+  return mapLibrePluginFactory;
 };
 
-const maplibrePluginFactory: PluginType = () => {
+const mapLibrePluginFactory: PluginType = () => {
   return {
-    view: ({ attrs: { iv, props, field } }) => {
+    oninit: () => {
+      // type checks
+      // hier iconen toevoegen
+    },
+    view: ({ attrs: { iv, props, field, onchange } }) => {
       const id = props.id || '';
-      const className = field.className || 'col s12';
-      const style = field.style || 'height: 400px';
-      const sources: IMapLibreSource[] = iv.sources;
-      const drawingPolygons: boolean = field.drawingPolygons;
-      const drawnPolygonLimit: number = field.drawnPolygonLimit || 0;
-      const polygons = iv.polygons;
-
-      if (drawingPolygons && !polygons) {
-        iv.polygons = {
+      const {
+        sources = [] as IMapLibreSource[],
+        polygons = {
           type: 'FeatureCollection',
           features: [],
-        };
-      }
+        } as FeatureCollection,
+      } = iv;
+      const { className = 'col s12', drawingPolygons = false, drawnPolygonLimit = 0, style = 'height: 400px' } = field;
 
-      if (!sources) {
-        iv.sources = [];
-      }
-
-      return m(MaplibreMap, {
+      return m(mapLibreMap, {
         id,
         className,
         style,
         sources,
         drawingPolygons,
         drawnPolygonLimit,
-        polygons: iv.polygons,
-        appIcons,
+        polygons,
+        options,
+        onStateChange: (state: pluginState) => {
+          onchange && onchange(state as unknown as string);
+          m.redraw();
+        },
       });
     },
   };

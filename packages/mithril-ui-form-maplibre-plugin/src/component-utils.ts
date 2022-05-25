@@ -1,6 +1,6 @@
-import m from 'mithril';
 import { GeoJSONFeature, GeoJSONSource, LayerSpecification, MapLayerMouseEvent } from 'maplibre-gl';
 import { FeatureCollection, Point } from 'geojson';
+import { DrawableMap, pluginState } from './component';
 
 interface IMapLibreLayer {
   id: string;
@@ -19,36 +19,53 @@ export interface IMapLibreSource {
 
 export const handleDrawCreateEvent = (
   draw: MapboxDraw,
+  map: DrawableMap,
   features: GeoJSONFeature[],
-  polygons: FeatureCollection,
-  drawnPolygonLimit: number | undefined
+  state: pluginState,
+  drawnPolygonLimit: number | undefined,
+  onStateChange: any
 ) => {
-  polygons.features.push(features[0]);
-  if (drawnPolygonLimit && drawnPolygonLimit > 0 && polygons.features.length > drawnPolygonLimit) {
-    const oldestPolygonId = polygons.features[0].id?.toString();
+  state.polygons.features.push(features[0]);
+  if (drawnPolygonLimit && drawnPolygonLimit > 0 && state.polygons.features.length > drawnPolygonLimit) {
+    const oldestPolygonId = state.polygons.features[0].id?.toString();
     if (oldestPolygonId) draw.delete(oldestPolygonId);
-    polygons.features.shift();
+    state.polygons.features.shift();
   }
-  m.redraw();
+  onStateChange(state);
+  map.redraw();
 };
 
-export const handleDrawUpdateEvent = (features: GeoJSONFeature[], polygons: FeatureCollection) => {
-  polygons.features = polygons.features.map((pfeature) => (features[0].id === pfeature.id ? features[0] : pfeature));
-  m.redraw();
+export const handleDrawUpdateEvent = (
+  map: DrawableMap,
+  features: GeoJSONFeature[],
+  state: pluginState,
+  onStateChange: any
+) => {
+  state.polygons.features = state.polygons.features.map((pfeature) =>
+    features[0].id === pfeature.id ? features[0] : pfeature
+  );
+  onStateChange(state);
+  map.redraw();
 };
 
-export const handleDrawDeleteEvent = (features: GeoJSONFeature[], polygons: FeatureCollection) => {
-  polygons.features = polygons.features.filter((pfeature) => pfeature.id !== features[0].id);
-  m.redraw();
+export const handleDrawDeleteEvent = (
+  map: DrawableMap,
+  features: GeoJSONFeature[],
+  state: pluginState,
+  onStateChange: any
+) => {
+  state.polygons.features = state.polygons.features.filter((pfeature) => pfeature.id !== features[0].id);
+  onStateChange(state);
+  map.redraw();
 };
 
-export const updatePolygons = (polygons: FeatureCollection, draw: MapboxDraw) => {
-  draw.set(polygons);
+export const updatePolygons = (polygons: FeatureCollection | undefined, draw: MapboxDraw) => {
+  if (polygons) draw.set(polygons);
 };
 
-export const updateSourcesAndLayers = (sources: IMapLibreSource[], map: maplibregl.Map, canvas: HTMLElement) => {
-  if (sources) {
-    sources.forEach((source: IMapLibreSource) => {
+export const updateSourcesAndLayers = (state: pluginState, map: maplibregl.Map, canvas: HTMLElement) => {
+  if (state.sources) {
+    state.sources.forEach((source: IMapLibreSource) => {
       if (!map.getSource(source.id)) {
         map.addSource(source.id, {
           type: 'geojson',
@@ -85,63 +102,45 @@ export const updateSourcesAndLayers = (sources: IMapLibreSource[], map: maplibre
 };
 
 export const addMapListenersForMovingFeatures = (
-  sources: IMapLibreSource[],
+  state: pluginState,
+  onStateChange: any,
   map: maplibregl.Map,
   canvas: HTMLElement
 ) => {
-  if (sources) {
-    map.on('mousedown', (e) => {
-      const topFeatureAtClick = map.queryRenderedFeatures(e.point)[0];
-      if (topFeatureAtClick.properties.movable) {
-        e.preventDefault();
-        map.moveLayer(topFeatureAtClick.layer.id);
-        canvas.style.cursor = 'grab';
-        const eventsWhenMouseDownAndMoving = (e: MapLayerMouseEvent) => {
-          canvas.style.cursor = 'grabbing';
-          // update only source of map when moving feature
-          const coordinates = e.lngLat;
-          (map.getSource(topFeatureAtClick.source) as GeoJSONSource).setData({
-            type: 'FeatureCollection',
-            features: [
-              {
-                type: 'Feature',
-                properties: {},
-                geometry: {
-                  type: 'Point',
-                  coordinates: [coordinates.lng, coordinates.lat],
-                },
+  map.on('mousedown', (e) => {
+    const topFeatureAtClick = map.queryRenderedFeatures(e.point)[0];
+    if (topFeatureAtClick.properties.movable) {
+      e.preventDefault();
+      map.moveLayer(topFeatureAtClick.layer.id);
+      canvas.style.cursor = 'grab';
+      const eventsWhenMouseDownAndMoving = (e: MapLayerMouseEvent) => {
+        canvas.style.cursor = 'grabbing';
+        // update only source of map when moving feature
+        const coordinates = e.lngLat;
+        (map.getSource(topFeatureAtClick.source) as GeoJSONSource).setData({
+          type: 'FeatureCollection',
+          features: [
+            {
+              type: 'Feature',
+              properties: {},
+              geometry: {
+                type: 'Point',
+                coordinates: [coordinates.lng, coordinates.lat],
               },
-            ],
-          });
-        };
-        map.on('mousemove', eventsWhenMouseDownAndMoving);
-        map.once('mouseup', (e) => {
-          canvas.style.cursor = '';
-          const coordinates = e.lngLat;
-          // moving feature stops, last location of the feature is saved in the source in the application
-          const index = sources.findIndex((source) => source.id === topFeatureAtClick.source);
-          (sources[index].source.features[0].geometry as Point).coordinates = [coordinates.lng, coordinates.lat];
-          map.off('mousemove', eventsWhenMouseDownAndMoving);
-          m.redraw();
+            },
+          ],
         });
-      }
-    });
-  }
-};
-
-export const generateGradientIcon = (width = 64) => {
-  const bytesPerPixel = 4; // Each pixel is represented by 4 bytes: red, green, blue, and alpha.
-  const data = new Uint8Array(width * width * bytesPerPixel);
-
-  for (let x = 0; x < width; x++) {
-    for (let y = 0; y < width; y++) {
-      const offset = (y * width + x) * bytesPerPixel;
-      data[offset + 0] = (y / width) * 255; // red
-      data[offset + 1] = (x / width) * 255; // green
-      data[offset + 2] = 128; // blue
-      data[offset + 3] = 255; // alpha
+      };
+      map.on('mousemove', eventsWhenMouseDownAndMoving);
+      map.once('mouseup', (e) => {
+        canvas.style.cursor = '';
+        const coordinates = e.lngLat;
+        // moving feature stops, last location of the feature is saved in the source in the application
+        const index = state.sources.findIndex((source) => source.id === topFeatureAtClick.source);
+        (state.sources[index].source.features[0].geometry as Point).coordinates = [coordinates.lng, coordinates.lat];
+        map.off('mousemove', eventsWhenMouseDownAndMoving);
+        onStateChange(state);
+      });
     }
-  }
-
-  return { width: width, height: width, data: data };
+  });
 };

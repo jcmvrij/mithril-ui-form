@@ -11,7 +11,6 @@ import maplibregl, {
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import {
   addMapListenersForMovingFeatures,
-  generateGradientIcon,
   handleDrawCreateEvent,
   handleDrawDeleteEvent,
   handleDrawUpdateEvent,
@@ -19,11 +18,11 @@ import {
   updatePolygons,
   updateSourcesAndLayers,
 } from './component-utils';
-
+import { FeatureCollection } from 'geojson';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
-export interface IMaplibreMap extends Attributes {
+export interface IMapLibreMap extends Attributes {
   id?: string;
   source?: IMapLibreSource;
   drawnPolygonLimit?: number;
@@ -39,7 +38,7 @@ declare type MapLayerEventTypeDrawExtended = MapLayerEventType & {
   'draw.delete': (e: { type: string; features: GeoJSONFeature[] }) => void;
 };
 
-declare interface DrawableMap {
+export declare interface DrawableMap {
   on(type: MapEvent, listener: Listener): this;
   on<T extends keyof MapEventType>(type: T, listener: (ev: MapEventType[T] & Object) => void): this;
   on<U extends keyof MapLayerEventTypeDrawExtended>(event: U, listener: MapLayerEventTypeDrawExtended[U]): this;
@@ -50,27 +49,43 @@ declare interface DrawableMap {
   ): this;
 }
 
-class DrawableMap extends maplibregl.Map {}
+export class DrawableMap extends maplibregl.Map {}
 
-export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
+export interface pluginState {
+  polygons: FeatureCollection;
+  sources: IMapLibreSource[];
+}
+
+export const mapLibreMap: FactoryComponent<IMapLibreMap> = () => {
   let componentId: string | HTMLElement;
   let map: DrawableMap;
   let draw: MapboxDraw;
   let canvas: HTMLElement;
+  let state: pluginState = {
+    polygons: {
+      type: 'FeatureCollection',
+      features: [],
+    },
+    sources: [],
+  };
 
   return {
-    oninit: ({ attrs: { id } }) => {
+    oninit: ({ attrs: { id, polygons, sources } }) => {
       componentId = id || uniqueId();
+      state.polygons = polygons;
+      state.sources = sources;
+      console.log(state);
     },
-    onupdate: ({ attrs: { sources, polygons } }) => {
-      if (polygons) updatePolygons(polygons, draw);
-      updateSourcesAndLayers(sources, map, canvas);
+    onupdate: () => {
+      console.log('component update <>');
+      if (state.polygons) updatePolygons(state.polygons, draw);
+      updateSourcesAndLayers(state, map, canvas);
     },
     view: ({ attrs: { style, className } }) => {
       return m(`div[id=${componentId}]`, { style, className });
     },
     oncreate: ({
-      attrs: { mapstyle, center, zoom, maxZoom, sources, polygons, drawingPolygons, drawnPolygonLimit, appIcons },
+      attrs: { onStateChange, mapstyle, center, zoom, maxZoom, drawingPolygons, drawnPolygonLimit, options },
     }) => {
       map = new maplibregl.Map({
         container: componentId,
@@ -79,15 +94,17 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
         zoom: zoom || 15.99,
         maxZoom: maxZoom || 15.99,
       });
-      if (appIcons) {
-        (appIcons as Array<[img: any, name: string]>).forEach(([image, name]) => {
+      console.log('map object created');
+      if (options.appIcons) {
+        (options.appIcons as Array<[img: string, name: string]>).forEach(([image, name]) => {
           map.loadImage(image, (error, img) => {
+            console.log('image loaded');
             if (error) throw error;
             if (!map.hasImage(name)) map.addImage(name, img as ImageBitmap);
           });
         });
       }
-      if (polygons || drawingPolygons) {
+      if (state.polygons || drawingPolygons) {
         draw = new MapboxDraw({
           displayControlsDefault: false,
           controls: {
@@ -97,26 +114,31 @@ export const MaplibreMap: FactoryComponent<IMaplibreMap> = () => {
         });
         // @ts-ignore
         map.addControl(draw as IControl, 'top-left');
-        map.on('draw.create', ({ features }) => {
-          handleDrawCreateEvent(draw, features, polygons, drawnPolygonLimit);
-        });
-        map.on('draw.update', ({ features }) => handleDrawUpdateEvent(features, polygons));
-        map.on('draw.delete', ({ features }) => handleDrawDeleteEvent(features, polygons));
+
+        map.on('draw.create', ({ features }) =>
+          handleDrawCreateEvent(draw, map, features, state, drawnPolygonLimit, onStateChange)
+        );
+        map.on('draw.update', ({ features }) => handleDrawUpdateEvent(map, features, state, onStateChange));
+        map.on('draw.delete', ({ features }) => handleDrawDeleteEvent(map, features, state, onStateChange));
 
         map.once('load', () => {
-          updatePolygons(polygons, draw);
+          updatePolygons(state.polygons, draw);
         });
       }
 
       map.on('styleimagemissing', (e) => {
-        map.addImage(e.id, generateGradientIcon());
+        map.loadImage(options.fallbackIcon, (error, image) => {
+          if (error) throw error;
+          map.addImage(e.id, image as ImageBitmap);
+          console.log('fallback image for ' + e.id + ' loaded');
+        });
       });
 
       canvas = map.getCanvasContainer();
-      addMapListenersForMovingFeatures(sources, map, canvas);
+      addMapListenersForMovingFeatures(state, onStateChange, map, canvas);
 
       map.once('load', () => {
-        updateSourcesAndLayers(sources, map, canvas);
+        updateSourcesAndLayers(state, map, canvas);
       });
     },
   };
