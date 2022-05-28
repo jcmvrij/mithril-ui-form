@@ -1,21 +1,28 @@
-# A map plugin using the maplibre library for Mithril-ui-form
+# A map plugin for Mithril-ui-form using the maplibre library 
 
-[Mithril-ui-form](https://www.npmjs.com/package/mithril-ui-form) is a declarative framework to create forms using the front-end [Mithril framework](https://mithril.js.org/) and [mithril-materialized](https://www.npmjs.com/package/mithril-materialized) components using the [materialize-css](http://materializecss.com/) design theme.
-
-
-Implemented:
-- Move features on the map
-- Draw and manipulate polygons on the map
-
-You are able to limit the amount of drawn polygons through the drawnPolygonLimit property.
-
-
-
+This is a plugin for [Mithril-ui-form](https://www.npmjs.com/package/mithril-ui-form). It is based on [MapLibre GL](https://www.npmjs.com/package/maplibre-gl).
 
 ```ts
-import { maplibrePlugin } from 'mithril-ui-form-maplibre-plugin';
+import { mapLibrePlugin } from 'mithril-ui-form-maplibre-plugin';
 
 ...
 
-registerPlugin('libremap', maplibrePlugin);
+registerPlugin('libremap', mapLibrePlugin());
+```
+
+You can load icons (and a fallback icon) that can then be used in map layers.
+```ts
+import { mapLibrePlugin } from 'mithril-ui-form-maplibre-plugin';
+import red from './assets/red.png';
+import blue from './assets/blue.png';
+import genericMarkerIcon from './assets/x.png';
+...
+const options = {
+    icons: [
+        [red, 'RED'],
+        [blue, 'BLUE'],
+    ],
+    fallbackIcon: genericMarkerIcon
+}
+registerPlugin('libremap', mapLibrePlugin(options));
 ```
