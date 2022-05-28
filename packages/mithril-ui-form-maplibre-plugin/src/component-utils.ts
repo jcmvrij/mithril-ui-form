@@ -168,7 +168,7 @@ export const addFallbackIcon = (map: DrawableMap, fallbackIcon: string) => {
   }
 };
 
-export const createDrawBasedOnContext = (polygonControlBar: boolean, polygons: FeatureCollection) => {
+export const createMapboxDrawBasedOnContext = (polygonControlBar: boolean, polygons: FeatureCollection) => {
   if (polygonControlBar) {
     return new MapboxDraw({
       displayControlsDefault: false,

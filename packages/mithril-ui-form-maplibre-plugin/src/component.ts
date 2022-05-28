@@ -13,7 +13,7 @@ import {
   addIcons,
   addFallbackIcon,
   addMovingFeaturesMapListeners,
-  createDrawBasedOnContext,
+  createMapboxDrawBasedOnContext,
   handleDrawCreateEvent,
   handleDrawDeleteEvent,
   handleDrawUpdateEvent,
@@ -102,7 +102,7 @@ export const mapLibreMap: FactoryComponent<IMapLibreMap> = () => {
       canvas = map.getCanvasContainer();
       addMovingFeaturesMapListeners(state, onStateChange, map, canvas);
 
-      draw = createDrawBasedOnContext(polygonControlBar, state.polygons);
+      draw = createMapboxDrawBasedOnContext(polygonControlBar, state.polygons);
       if (draw) {
         // @ts-ignore
         map.addControl(draw as IControl, 'top-left');
