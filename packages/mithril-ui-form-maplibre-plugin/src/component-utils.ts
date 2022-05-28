@@ -1,6 +1,7 @@
 import { GeoJSONFeature, GeoJSONSource, LayerSpecification, MapLayerMouseEvent } from 'maplibre-gl';
 import { FeatureCollection, Point } from 'geojson';
-import { DrawableMap, pluginState } from './component';
+import { DrawableMap, mapLibreState } from './component';
+import MapboxDraw from '@mapbox/mapbox-gl-draw';
 
 interface IMapLibreLayer {
   id: string;
@@ -18,54 +19,40 @@ export interface IMapLibreSource {
 }
 
 export const handleDrawCreateEvent = (
-  draw: MapboxDraw,
-  map: DrawableMap,
   features: GeoJSONFeature[],
-  state: pluginState,
+  state: mapLibreState,
+  draw: MapboxDraw | null,
   drawnPolygonLimit: number | undefined,
   onStateChange: any
 ) => {
   state.polygons.features.push(features[0]);
-  if (drawnPolygonLimit && drawnPolygonLimit > 0 && state.polygons.features.length > drawnPolygonLimit) {
+  if (draw && drawnPolygonLimit && drawnPolygonLimit > 0 && state.polygons.features.length > drawnPolygonLimit) {
     const oldestPolygonId = state.polygons.features[0].id?.toString();
     if (oldestPolygonId) draw.delete(oldestPolygonId);
     state.polygons.features.shift();
   }
   onStateChange(state);
-  map.redraw();
 };
 
-export const handleDrawUpdateEvent = (
-  map: DrawableMap,
-  features: GeoJSONFeature[],
-  state: pluginState,
-  onStateChange: any
-) => {
+export const handleDrawUpdateEvent = (features: GeoJSONFeature[], state: mapLibreState, onStateChange: any) => {
   state.polygons.features = state.polygons.features.map((pfeature) =>
     features[0].id === pfeature.id ? features[0] : pfeature
   );
   onStateChange(state);
-  map.redraw();
 };
 
-export const handleDrawDeleteEvent = (
-  map: DrawableMap,
-  features: GeoJSONFeature[],
-  state: pluginState,
-  onStateChange: any
-) => {
+export const handleDrawDeleteEvent = (features: GeoJSONFeature[], state: mapLibreState, onStateChange: any) => {
   state.polygons.features = state.polygons.features.filter((pfeature) => pfeature.id !== features[0].id);
   onStateChange(state);
-  map.redraw();
 };
 
-export const updatePolygons = (polygons: FeatureCollection | undefined, draw: MapboxDraw) => {
-  if (polygons) draw.set(polygons);
+export const updatePolygons = (polygons: FeatureCollection | undefined, draw: MapboxDraw | null) => {
+  if (polygons && draw) draw.set(polygons);
 };
 
-export const updateSourcesAndLayers = (state: pluginState, map: maplibregl.Map, canvas: HTMLElement) => {
-  if (state.sources) {
-    state.sources.forEach((source: IMapLibreSource) => {
+export const updateSourcesAndLayers = (sources: IMapLibreSource[], map: maplibregl.Map, canvas: HTMLElement) => {
+  if (sources) {
+    sources.forEach((source: IMapLibreSource) => {
       if (!map.getSource(source.id)) {
         map.addSource(source.id, {
           type: 'geojson',
@@ -89,20 +76,22 @@ export const updateSourcesAndLayers = (state: pluginState, map: maplibregl.Map, 
             filter: layer.filter,
           });
 
-          map.on('mouseenter', layerId, () => {
-            canvas.style.cursor = 'move';
-          });
-          map.on('mouseleave', layerId, () => {
-            canvas.style.cursor = '';
-          });
+          if (source.source.features[0].properties && source.source.features[0].properties.movable) {
+            map.on('mouseenter', layerId, () => {
+              canvas.style.cursor = 'move';
+            });
+            map.on('mouseleave', layerId, () => {
+              canvas.style.cursor = '';
+            });
+          }
         }
       });
     });
   }
 };
 
-export const addMapListenersForMovingFeatures = (
-  state: pluginState,
+export const addMovingFeaturesMapListeners = (
+  state: mapLibreState,
   onStateChange: any,
   map: maplibregl.Map,
   canvas: HTMLElement
@@ -143,4 +132,56 @@ export const addMapListenersForMovingFeatures = (
       });
     }
   });
+};
+
+export const uniqueId = () => {
+  return 'idxxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    // tslint:disable-next-line:no-bitwise
+    const r = (Math.random() * 16) | 0;
+    // tslint:disable-next-line:no-bitwise
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
+export const addIcons = (map: DrawableMap, appIcons: Array<[img: string, name: string]>) => {
+  if (appIcons) {
+    appIcons.forEach(([image, name]) => {
+      map.loadImage(image, (error, img) => {
+        if (error) throw error;
+        if (!map.hasImage(name)) map.addImage(name, img as ImageBitmap);
+      });
+    });
+  }
+};
+
+export const addFallbackIcon = (map: DrawableMap, fallbackIcon: string) => {
+  if (fallbackIcon) {
+    let loadedFallbackImage: ImageBitmap;
+    map.loadImage(fallbackIcon, (error, image) => {
+      if (error) throw error;
+      loadedFallbackImage = image as ImageBitmap;
+    });
+    map.on('styleimagemissing', ({ id }) => {
+      map.addImage(id, loadedFallbackImage);
+    });
+  }
+};
+
+export const createDrawBasedOnContext = (polygonControlBar: boolean, polygons: FeatureCollection) => {
+  if (polygonControlBar) {
+    return new MapboxDraw({
+      displayControlsDefault: false,
+      controls: {
+        polygon: true,
+        trash: true,
+      },
+    });
+  } else if (polygons) {
+    return new MapboxDraw({
+      displayControlsDefault: false,
+      controls: {},
+    });
+  }
+  return null;
 };

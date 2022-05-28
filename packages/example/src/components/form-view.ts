@@ -154,8 +154,15 @@ You can also include _markdown_ in your UIForm.`,
     id: 'libremap',
     type: 'libremap',
     style: 'height: 500px',
-    drawingPolygons: true,
     drawnPolygonLimit: 1,
+    required: true,
+    className: 'col s12',
+  },
+  {
+    id: 'libremap2',
+    type: 'libremap',
+    style: 'height: 200px',
+    polygonControlBar: false,
     required: true,
     className: 'col s12',
   },
@@ -310,7 +317,6 @@ export const FormView = () => {
             },
           ],
         },
-
         {
           id: 'TeamWhiteUnit1',
           source: {
@@ -338,6 +344,43 @@ export const FormView = () => {
                 'icon-allow-overlap': true,
               },
               paint: {},
+              filter: ['all'],
+            },
+          ],
+        },
+      ],
+    },
+    libremap2: {
+      sources: [
+        {
+          id: 'TeamBlueUnit1',
+          source: {
+            type: 'FeatureCollection',
+            features: [
+              {
+                type: 'Feature',
+                properties: {
+                  movable: false,
+                },
+                geometry: {
+                  type: 'Point',
+                  coordinates: [4.327293, 52.11],
+                },
+              },
+            ],
+          },
+          layers: [
+            {
+              id: 'Layer',
+              type: 'symbol',
+              layout: {
+                'icon-image': 'BLUE',
+                'icon-size': ['interpolate', ['exponential', 0.5], ['zoom'], 15, 0.7, 20, 0.2],
+                'icon-allow-overlap': true,
+              },
+              paint: {
+                'icon-opacity': 0.8,
+              },
               filter: ['all'],
             },
           ],

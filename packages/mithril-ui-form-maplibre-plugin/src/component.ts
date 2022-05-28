@@ -10,11 +10,15 @@ import maplibregl, {
 } from 'maplibre-gl';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 import {
-  addMapListenersForMovingFeatures,
+  addIcons,
+  addFallbackIcon,
+  addMovingFeaturesMapListeners,
+  createDrawBasedOnContext,
   handleDrawCreateEvent,
   handleDrawDeleteEvent,
   handleDrawUpdateEvent,
   IMapLibreSource,
+  uniqueId,
   updatePolygons,
   updateSourcesAndLayers,
 } from './component-utils';
@@ -51,7 +55,7 @@ export declare interface DrawableMap {
 
 export class DrawableMap extends maplibregl.Map {}
 
-export interface pluginState {
+export interface mapLibreState {
   polygons: FeatureCollection;
   sources: IMapLibreSource[];
 }
@@ -59,9 +63,9 @@ export interface pluginState {
 export const mapLibreMap: FactoryComponent<IMapLibreMap> = () => {
   let componentId: string | HTMLElement;
   let map: DrawableMap;
-  let draw: MapboxDraw;
+  let draw: MapboxDraw | null;
   let canvas: HTMLElement;
-  let state: pluginState = {
+  let state: mapLibreState = {
     polygons: {
       type: 'FeatureCollection',
       features: [],
@@ -74,82 +78,45 @@ export const mapLibreMap: FactoryComponent<IMapLibreMap> = () => {
       componentId = id || uniqueId();
       state.polygons = polygons;
       state.sources = sources;
-      console.log(state);
     },
     onupdate: () => {
-      console.log('component update <>');
-      if (state.polygons) updatePolygons(state.polygons, draw);
-      updateSourcesAndLayers(state, map, canvas);
+      updatePolygons(state.polygons, draw);
+      updateSourcesAndLayers(state.sources, map, canvas);
     },
     view: ({ attrs: { style, className } }) => {
       return m(`div[id=${componentId}]`, { style, className });
     },
     oncreate: ({
-      attrs: { onStateChange, mapstyle, center, zoom, maxZoom, drawingPolygons, drawnPolygonLimit, options },
+      attrs: { onStateChange, mapstyle, center, zoom, maxZoom, polygonControlBar, drawnPolygonLimit, options },
     }) => {
       map = new maplibregl.Map({
         container: componentId,
-        style: mapstyle || 'https://geodata.nationaalgeoregister.nl/beta/topotiles-viewer/styles/achtergrond.json',
-        center: center || [4.327, 52.11],
-        zoom: zoom || 15.99,
-        maxZoom: maxZoom || 15.99,
+        style: mapstyle,
+        center: center,
+        zoom: zoom,
+        maxZoom: maxZoom,
       });
-      console.log('map object created');
-      if (options.appIcons) {
-        (options.appIcons as Array<[img: string, name: string]>).forEach(([image, name]) => {
-          map.loadImage(image, (error, img) => {
-            console.log('image loaded');
-            if (error) throw error;
-            if (!map.hasImage(name)) map.addImage(name, img as ImageBitmap);
-          });
-        });
-      }
-      if (state.polygons || drawingPolygons) {
-        draw = new MapboxDraw({
-          displayControlsDefault: false,
-          controls: {
-            polygon: true,
-            trash: true,
-          },
-        });
-        // @ts-ignore
-        map.addControl(draw as IControl, 'top-left');
-
-        map.on('draw.create', ({ features }) =>
-          handleDrawCreateEvent(draw, map, features, state, drawnPolygonLimit, onStateChange)
-        );
-        map.on('draw.update', ({ features }) => handleDrawUpdateEvent(map, features, state, onStateChange));
-        map.on('draw.delete', ({ features }) => handleDrawDeleteEvent(map, features, state, onStateChange));
-
-        map.once('load', () => {
-          updatePolygons(state.polygons, draw);
-        });
-      }
-
-      map.on('styleimagemissing', (e) => {
-        map.loadImage(options.fallbackIcon, (error, image) => {
-          if (error) throw error;
-          map.addImage(e.id, image as ImageBitmap);
-          console.log('fallback image for ' + e.id + ' loaded');
-        });
-      });
+      addIcons(map, options.appIcons);
+      addFallbackIcon(map, options.fallbackIcon);
 
       canvas = map.getCanvasContainer();
-      addMapListenersForMovingFeatures(state, onStateChange, map, canvas);
+      addMovingFeaturesMapListeners(state, onStateChange, map, canvas);
+
+      draw = createDrawBasedOnContext(polygonControlBar, state.polygons);
+      if (draw) {
+        // @ts-ignore
+        map.addControl(draw as IControl, 'top-left');
+        map.on('draw.create', ({ features }) =>
+          handleDrawCreateEvent(features, state, draw, drawnPolygonLimit, onStateChange)
+        );
+        map.on('draw.update', ({ features }) => handleDrawUpdateEvent(features, state, onStateChange));
+        map.on('draw.delete', ({ features }) => handleDrawDeleteEvent(features, state, onStateChange));
+      }
 
       map.once('load', () => {
-        updateSourcesAndLayers(state, map, canvas);
+        updatePolygons(state.polygons, draw);
+        updateSourcesAndLayers(state.sources, map, canvas);
       });
     },
   };
-};
-
-const uniqueId = () => {
-  return 'idxxxxxxxxxxxx4xxxyxxxxxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
-    // tslint:disable-next-line:no-bitwise
-    const r = (Math.random() * 16) | 0;
-    // tslint:disable-next-line:no-bitwise
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
 };
