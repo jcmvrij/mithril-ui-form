@@ -25,6 +25,7 @@ import {
 import { FeatureCollection } from 'geojson';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
+import { MapLibrePluginState } from './plugin';
 
 export interface IMapLibreMap extends Attributes {
   id: string;
@@ -40,7 +41,7 @@ export interface IMapLibreMap extends Attributes {
   drawnPolygonLimit: number;
   mapIcons?: Array<[img: string, name: string]>;
   mapFallbackIcon?: string;
-  onStateChange: (state: MapLibreState) => void;
+  onStateChange: (state: MapLibrePluginState) => void;
 }
 
 declare type MapLayerEventTypeDrawExtended = MapLayerEventType & {
@@ -62,17 +63,12 @@ export declare interface DrawableMap {
 
 export class DrawableMap extends maplibregl.Map {}
 
-export interface MapLibreState {
-  polygons: FeatureCollection;
-  sources: IMapLibreSource[];
-}
-
 export const mapLibreMap: FactoryComponent<IMapLibreMap> = () => {
   let componentId: string | HTMLElement;
   let map: DrawableMap;
   let draw: MapboxDraw | null;
   let canvas: HTMLElement;
-  let state: MapLibreState = {
+  let state: MapLibrePluginState = {
     polygons: {
       type: 'FeatureCollection',
       features: [],

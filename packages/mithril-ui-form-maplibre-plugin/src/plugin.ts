@@ -1,7 +1,7 @@
 import m from 'mithril';
 import { FeatureCollection } from 'geojson';
 import { PluginType } from 'mithril-ui-form-plugin';
-import { mapLibreMap, MapLibreState } from './component';
+import { mapLibreMap } from './component';
 import { IMapLibreSource } from './componentUtils';
 
 let mapIcons: Array<[img: string, name: string]>;
@@ -13,7 +13,7 @@ export const mapLibrePlugin = (fallbackIcon?: string, icons?: Array<[img: string
   return mapLibrePluginFactory;
 };
 
-interface MapLibreinput {
+export interface MapLibrePluginState {
   sources: IMapLibreSource[];
   polygons: FeatureCollection;
 }
@@ -36,7 +36,7 @@ const mapLibrePluginFactory: PluginType = () => {
           type: 'FeatureCollection',
           features: [],
         } as FeatureCollection,
-      }: MapLibreinput = iv;
+      }: MapLibrePluginState = iv;
       const {
         className = 'col s12',
         style = 'height: 400px',
@@ -62,7 +62,7 @@ const mapLibrePluginFactory: PluginType = () => {
         drawnPolygonLimit,
         mapIcons,
         mapFallbackIcon,
-        onStateChange: (state: MapLibreState) => {
+        onStateChange: (state: MapLibrePluginState) => {
           onchange && onchange(state as unknown as string);
           m.redraw();
         },
