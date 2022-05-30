@@ -3,7 +3,7 @@ import { LayoutForm, registerPlugin, UIForm, SlimdownView, I18n, render } from '
 import { TextArea } from 'mithril-materialized';
 import { leafletPlugin } from 'mithril-ui-form-leaflet-plugin';
 import { ratingPlugin } from 'mithril-ui-form-rating-plugin';
-import { mapLibrePlugin, MapLibrePluginOptions } from 'mithril-ui-form-maplibre-plugin';
+import { mapLibrePlugin } from 'mithril-ui-form-maplibre-plugin';
 import markerIcon from '../assets/noun-map-pin-626096.png';
 
 export interface IContext {
@@ -182,7 +182,7 @@ You can also include _markdown_ in your UIForm.`,
 export const FormView = () => {
   registerPlugin('map', leafletPlugin);
   registerPlugin('rating', ratingPlugin);
-  registerPlugin('libremap', mapLibrePlugin({ fallbackIcon: markerIcon } as MapLibrePluginOptions));
+  registerPlugin('libremap', mapLibrePlugin(markerIcon));
 
   const state = {
     result: {} as ILessonLearned,

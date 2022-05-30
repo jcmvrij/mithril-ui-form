@@ -21,19 +21,26 @@ import {
   uniqueId,
   updatePolygons,
   updateSourcesAndLayers,
-} from './component-utils';
+} from './componentUtils';
 import { FeatureCollection } from 'geojson';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
 export interface IMapLibreMap extends Attributes {
-  id?: string;
-  source?: IMapLibreSource;
-  drawnPolygonLimit?: number;
-  style?: StyleSpecification | string;
-  center?: LngLatLike;
-  zoom?: number;
-  maxZoom?: number | null;
+  id: string;
+  className: string;
+  style: StyleSpecification | string;
+  mapstyle: string;
+  center: LngLatLike;
+  zoom: number;
+  maxZoom: number | null;
+  sources: IMapLibreSource[];
+  polygons: FeatureCollection;
+  polygonControlBar: boolean;
+  drawnPolygonLimit: number;
+  mapIcons?: Array<[img: string, name: string]>;
+  mapFallbackIcon?: string;
+  onStateChange: (state: MapLibreState) => void;
 }
 
 declare type MapLayerEventTypeDrawExtended = MapLayerEventType & {
@@ -55,7 +62,7 @@ export declare interface DrawableMap {
 
 export class DrawableMap extends maplibregl.Map {}
 
-export interface mapLibreState {
+export interface MapLibreState {
   polygons: FeatureCollection;
   sources: IMapLibreSource[];
 }
@@ -65,7 +72,7 @@ export const mapLibreMap: FactoryComponent<IMapLibreMap> = () => {
   let map: DrawableMap;
   let draw: MapboxDraw | null;
   let canvas: HTMLElement;
-  let state: mapLibreState = {
+  let state: MapLibreState = {
     polygons: {
       type: 'FeatureCollection',
       features: [],
@@ -87,7 +94,17 @@ export const mapLibreMap: FactoryComponent<IMapLibreMap> = () => {
       return m(`div[id=${componentId}]`, { style, className });
     },
     oncreate: ({
-      attrs: { onStateChange, mapstyle, center, zoom, maxZoom, polygonControlBar, drawnPolygonLimit, options },
+      attrs: {
+        onStateChange,
+        mapstyle,
+        center,
+        zoom,
+        maxZoom,
+        polygonControlBar,
+        drawnPolygonLimit,
+        mapIcons,
+        mapFallbackIcon,
+      },
     }) => {
       map = new maplibregl.Map({
         container: componentId,
@@ -96,8 +113,8 @@ export const mapLibreMap: FactoryComponent<IMapLibreMap> = () => {
         zoom: zoom,
         maxZoom: maxZoom,
       });
-      addIcons(map, options.appIcons);
-      addFallbackIcon(map, options.fallbackIcon);
+      if (mapIcons) addIcons(map, mapIcons);
+      if (mapFallbackIcon) addFallbackIcon(map, mapFallbackIcon);
 
       canvas = map.getCanvasContainer();
       addMovingFeaturesMapListeners(state, onStateChange, map, canvas);

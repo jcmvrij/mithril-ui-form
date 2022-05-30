@@ -1,6 +1,6 @@
 import { GeoJSONFeature, GeoJSONSource, LayerSpecification, MapLayerMouseEvent } from 'maplibre-gl';
 import { FeatureCollection, Point } from 'geojson';
-import { DrawableMap, mapLibreState } from './component';
+import { DrawableMap, MapLibreState } from './component';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
 
 interface IMapLibreLayer {
@@ -20,7 +20,7 @@ export interface IMapLibreSource {
 
 export const handleDrawCreateEvent = (
   features: GeoJSONFeature[],
-  state: mapLibreState,
+  state: MapLibreState,
   draw: MapboxDraw | null,
   drawnPolygonLimit: number | undefined,
   onStateChange: any
@@ -34,14 +34,14 @@ export const handleDrawCreateEvent = (
   onStateChange(state);
 };
 
-export const handleDrawUpdateEvent = (features: GeoJSONFeature[], state: mapLibreState, onStateChange: any) => {
+export const handleDrawUpdateEvent = (features: GeoJSONFeature[], state: MapLibreState, onStateChange: any) => {
   state.polygons.features = state.polygons.features.map((pfeature) =>
     features[0].id === pfeature.id ? features[0] : pfeature
   );
   onStateChange(state);
 };
 
-export const handleDrawDeleteEvent = (features: GeoJSONFeature[], state: mapLibreState, onStateChange: any) => {
+export const handleDrawDeleteEvent = (features: GeoJSONFeature[], state: MapLibreState, onStateChange: any) => {
   state.polygons.features = state.polygons.features.filter((pfeature) => pfeature.id !== features[0].id);
   onStateChange(state);
 };
@@ -91,7 +91,7 @@ export const updateSourcesAndLayers = (sources: IMapLibreSource[], map: maplibre
 };
 
 export const addMovingFeaturesMapListeners = (
-  state: mapLibreState,
+  state: MapLibreState,
   onStateChange: any,
   map: maplibregl.Map,
   canvas: HTMLElement
@@ -145,27 +145,23 @@ export const uniqueId = () => {
 };
 
 export const addIcons = (map: DrawableMap, appIcons: Array<[img: string, name: string]>) => {
-  if (appIcons) {
-    appIcons.forEach(([image, name]) => {
-      map.loadImage(image, (error, img) => {
-        if (error) throw error;
-        if (!map.hasImage(name)) map.addImage(name, img as ImageBitmap);
-      });
+  appIcons.forEach(([image, name]) => {
+    map.loadImage(image, (error, img) => {
+      if (error) throw error;
+      if (!map.hasImage(name)) map.addImage(name, img as ImageBitmap);
     });
-  }
+  });
 };
 
 export const addFallbackIcon = (map: DrawableMap, fallbackIcon: string) => {
-  if (fallbackIcon) {
-    let loadedFallbackImage: ImageBitmap;
-    map.loadImage(fallbackIcon, (error, image) => {
-      if (error) throw error;
-      loadedFallbackImage = image as ImageBitmap;
-    });
-    map.on('styleimagemissing', ({ id }) => {
-      map.addImage(id, loadedFallbackImage);
-    });
-  }
+  let loadedFallbackImage: ImageBitmap;
+  map.loadImage(fallbackIcon, (error, image) => {
+    if (error) throw error;
+    loadedFallbackImage = image as ImageBitmap;
+  });
+  map.on('styleimagemissing', ({ id }) => {
+    map.addImage(id, loadedFallbackImage);
+  });
 };
 
 export const createMapboxDrawBasedOnContext = (polygonControlBar: boolean, polygons: FeatureCollection) => {

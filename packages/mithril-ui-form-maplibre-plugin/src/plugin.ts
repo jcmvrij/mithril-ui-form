@@ -1,36 +1,31 @@
 import m from 'mithril';
 import { FeatureCollection } from 'geojson';
 import { PluginType } from 'mithril-ui-form-plugin';
-import { mapLibreMap, mapLibreState } from './component';
-import { IMapLibreSource } from './component-utils';
+import { mapLibreMap, MapLibreState } from './component';
+import { IMapLibreSource } from './componentUtils';
 
-export interface MapLibrePluginOptions {
-  icons?: Array<[img: string, name: string]>;
-  fallbackIcon?: string;
-}
+let mapIcons: Array<[img: string, name: string]>;
+let mapFallbackIcon: string;
 
-// type MapLibrePluginType = PluginType & {
-//   drawingPolygons: boolean;
-//   drawnPolygonLimit: number;
-// };
-
-let options: MapLibrePluginOptions;
-
-export const mapLibrePlugin = (mapLibrePluginOptions?: MapLibrePluginOptions) => {
-  if (mapLibrePluginOptions) options = mapLibrePluginOptions;
+export const mapLibrePlugin = (fallbackIcon?: string, icons?: Array<[img: string, name: string]>) => {
+  if (fallbackIcon) mapFallbackIcon = fallbackIcon;
+  if (icons) mapIcons = icons;
   return mapLibrePluginFactory;
 };
 
+interface MapLibreinput {
+  sources: IMapLibreSource[];
+  polygons: FeatureCollection;
+}
+
+// type MapLibrePluginType = PluginType & {
+//   options: MapLibrePluginOptions;
+// };
+
 const mapLibrePluginFactory: PluginType = () => {
-  // let typedSources;
-  // let typedPolygons;
   return {
     oninit: () => {
       // type checks
-      // if (instanceofIMapLibreSourceArray(iv.sources)) {
-      //   typedSources = iv.sources;
-      //   console.log(typedSources);
-      // }
       // hier iconen toevoegen
     },
     view: ({ attrs: { iv, props, field, onchange } }) => {
@@ -41,7 +36,7 @@ const mapLibrePluginFactory: PluginType = () => {
           type: 'FeatureCollection',
           features: [],
         } as FeatureCollection,
-      } = iv;
+      }: MapLibreinput = iv;
       const {
         className = 'col s12',
         style = 'height: 400px',
@@ -65,8 +60,9 @@ const mapLibrePluginFactory: PluginType = () => {
         polygons,
         polygonControlBar,
         drawnPolygonLimit,
-        options,
-        onStateChange: (state: mapLibreState) => {
+        mapIcons,
+        mapFallbackIcon,
+        onStateChange: (state: MapLibreState) => {
           onchange && onchange(state as unknown as string);
           m.redraw();
         },
@@ -74,10 +70,3 @@ const mapLibrePluginFactory: PluginType = () => {
     },
   };
 };
-
-// const instanceofIMapLibreSourceArray = (objectArray: any[]): objectArray is IMapLibreSource[] => {
-//   const nonConformingObject = objectArray.find(
-//     (object) => !('id' in object && 'source' in object && 'layers' in object)
-//   );
-//   return nonConformingObject === undefined;
-// };
