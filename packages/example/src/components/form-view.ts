@@ -229,27 +229,23 @@ export const FormView = () => {
       ],
     },
     libremap: {
-      polygons: {
-        type: 'FeatureCollection',
-        features: [
-          {
-            id: '4430943cc1c115dab684af7716c01672',
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              coordinates: [
-                [
-                  [4.325164424453902, 52.110598279004506],
-                  [4.326287984399585, 52.109583138578614],
-                  [4.3241056852743895, 52.10957650359774],
-                  [4.325164424453902, 52.110598279004506],
-                ],
+      polygons: [
+        {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            coordinates: [
+              [
+                [4.325164424453902, 52.110598279004506],
+                [4.326287984399585, 52.109583138578614],
+                [4.3241056852743895, 52.10957650359774],
+                [4.325164424453902, 52.110598279004506],
               ],
-              type: 'Polygon',
-            },
+            ],
+            type: 'Polygon',
           },
-        ],
-      },
+        },
+      ],
       sources: [
         {
           id: 'TeamBlueUnit1',

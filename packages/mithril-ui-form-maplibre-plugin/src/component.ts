@@ -22,10 +22,9 @@ import {
   updatePolygons,
   updateSourcesAndLayers,
 } from './componentUtils';
-import { FeatureCollection } from 'geojson';
+import { MapLibrePluginState } from './plugin';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
-import { MapLibrePluginState } from './plugin';
 
 export interface IMapLibreMap extends Attributes {
   id: string;
@@ -36,7 +35,7 @@ export interface IMapLibreMap extends Attributes {
   zoom: number;
   maxZoom: number | null;
   sources: IMapLibreSource[];
-  polygons: FeatureCollection;
+  polygons: GeoJSONFeature[];
   polygonControlBar: boolean;
   drawnPolygonLimit: number;
   mapIcons?: Array<[img: string, name: string]>;
@@ -69,10 +68,7 @@ export const mapLibreMap: FactoryComponent<IMapLibreMap> = () => {
   let draw: MapboxDraw | null;
   let canvas: HTMLElement;
   let state: MapLibrePluginState = {
-    polygons: {
-      type: 'FeatureCollection',
-      features: [],
-    },
+    polygons: [],
     sources: [],
   };
 

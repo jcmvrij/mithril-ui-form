@@ -26,29 +26,32 @@ export const handleDrawCreateEvent = (
   drawnPolygonLimit: number | undefined,
   onStateChange: any
 ) => {
-  state.polygons.features.push(features[0]);
-  if (draw && drawnPolygonLimit && drawnPolygonLimit > 0 && state.polygons.features.length > drawnPolygonLimit) {
-    const oldestPolygonId = state.polygons.features[0].id?.toString();
+  state.polygons.push(features[0]);
+  if (draw && drawnPolygonLimit && drawnPolygonLimit > 0 && state.polygons.length > drawnPolygonLimit) {
+    const oldestPolygonId = state.polygons[0].id?.toString();
     if (oldestPolygonId) draw.delete(oldestPolygonId);
-    state.polygons.features.shift();
+    state.polygons.shift();
   }
   onStateChange(state);
 };
 
 export const handleDrawUpdateEvent = (features: GeoJSONFeature[], state: MapLibrePluginState, onStateChange: any) => {
-  state.polygons.features = state.polygons.features.map((pfeature) =>
-    features[0].id === pfeature.id ? features[0] : pfeature
-  );
+  state.polygons = state.polygons.map((pfeature) => (features[0].id === pfeature.id ? features[0] : pfeature));
   onStateChange(state);
 };
 
 export const handleDrawDeleteEvent = (features: GeoJSONFeature[], state: MapLibrePluginState, onStateChange: any) => {
-  state.polygons.features = state.polygons.features.filter((pfeature) => pfeature.id !== features[0].id);
+  state.polygons = state.polygons.filter((pfeature) => pfeature.id !== features[0].id);
   onStateChange(state);
 };
 
-export const updatePolygons = (polygons: FeatureCollection | undefined, draw: MapboxDraw | null) => {
-  if (polygons && draw) draw.set(polygons);
+export const updatePolygons = (polygons: GeoJSONFeature[] | undefined, draw: MapboxDraw | null) => {
+  if (polygons && draw) {
+    draw.set({
+      type: 'FeatureCollection',
+      features: polygons,
+    });
+  }
 };
 
 export const updateSourcesAndLayers = (sources: IMapLibreSource[], map: maplibregl.Map, canvas: HTMLElement) => {
@@ -165,7 +168,7 @@ export const addFallbackIcon = (map: DrawableMap, fallbackIcon: string) => {
   });
 };
 
-export const createMapboxDrawBasedOnContext = (polygonControlBar: boolean, polygons: FeatureCollection) => {
+export const createMapboxDrawBasedOnContext = (polygonControlBar: boolean, polygons: GeoJSONFeature[]) => {
   if (polygonControlBar) {
     return new MapboxDraw({
       displayControlsDefault: false,

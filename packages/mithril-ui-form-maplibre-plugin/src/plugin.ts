@@ -1,8 +1,8 @@
 import m from 'mithril';
-import { FeatureCollection } from 'geojson';
 import { PluginType } from 'mithril-ui-form-plugin';
 import { mapLibreMap } from './component';
 import { IMapLibreSource } from './componentUtils';
+import { GeoJSONFeature } from 'maplibre-gl';
 
 let mapIcons: Array<[img: string, name: string]>;
 let mapFallbackIcon: string;
@@ -15,7 +15,7 @@ export const mapLibrePlugin = (fallbackIcon?: string, icons?: Array<[img: string
 
 export interface MapLibrePluginState {
   sources: IMapLibreSource[];
-  polygons: FeatureCollection;
+  polygons: GeoJSONFeature[];
 }
 
 // export interface MapLibrePluginState {
@@ -35,13 +35,7 @@ const mapLibrePluginFactory: PluginType = () => {
     },
     view: ({ attrs: { iv, props, field, onchange } }) => {
       const id = props.id || '';
-      const {
-        sources = [] as IMapLibreSource[],
-        polygons = {
-          type: 'FeatureCollection',
-          features: [],
-        } as FeatureCollection,
-      }: MapLibrePluginState = iv;
+      const { sources = [], polygons = [] }: MapLibrePluginState = iv;
       const {
         className = 'col s12',
         style = 'height: 400px',
