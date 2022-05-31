@@ -15,13 +15,12 @@ You can load your own icons that can then be used in symbol layers.
 import { mapLibrePlugin } from 'mithril-ui-form-maplibre-plugin';
 import red from './assets/red.png';
 import blue from './assets/blue.png';
-import genericMarkerIcon from './assets/x.png';
+import fallbackIcon from './assets/x.png';
 ...
 const icons: Array<[img: string, name: string]> = [
     [red, 'RED'],
     [blue, 'BLUE'],
 ];
-const fallbackIcon: string = genericMarkerIcon
 
 registerPlugin('libremap', mapLibrePlugin(fallbackIcon, icons));
 ```

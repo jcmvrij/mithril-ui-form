@@ -18,6 +18,11 @@ export interface MapLibrePluginState {
   polygons: FeatureCollection;
 }
 
+// export interface MapLibrePluginState {
+//   sources: IMapLibreSource[];
+//   polygons: Feature<Polygon>[];
+// }
+
 // type MapLibrePluginType = PluginType & {
 //   options: MapLibrePluginOptions;
 // };

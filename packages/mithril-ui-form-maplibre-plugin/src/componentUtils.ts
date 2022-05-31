@@ -1,7 +1,8 @@
 import { GeoJSONFeature, GeoJSONSource, LayerSpecification, MapLayerMouseEvent } from 'maplibre-gl';
 import { FeatureCollection, Point } from 'geojson';
-import { DrawableMap, MapLibreState } from './component';
+import { DrawableMap } from './component';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
+import { MapLibrePluginState } from './plugin';
 
 interface IMapLibreLayer {
   id: string;
@@ -20,7 +21,7 @@ export interface IMapLibreSource {
 
 export const handleDrawCreateEvent = (
   features: GeoJSONFeature[],
-  state: MapLibreState,
+  state: MapLibrePluginState,
   draw: MapboxDraw | null,
   drawnPolygonLimit: number | undefined,
   onStateChange: any
@@ -34,14 +35,14 @@ export const handleDrawCreateEvent = (
   onStateChange(state);
 };
 
-export const handleDrawUpdateEvent = (features: GeoJSONFeature[], state: MapLibreState, onStateChange: any) => {
+export const handleDrawUpdateEvent = (features: GeoJSONFeature[], state: MapLibrePluginState, onStateChange: any) => {
   state.polygons.features = state.polygons.features.map((pfeature) =>
     features[0].id === pfeature.id ? features[0] : pfeature
   );
   onStateChange(state);
 };
 
-export const handleDrawDeleteEvent = (features: GeoJSONFeature[], state: MapLibreState, onStateChange: any) => {
+export const handleDrawDeleteEvent = (features: GeoJSONFeature[], state: MapLibrePluginState, onStateChange: any) => {
   state.polygons.features = state.polygons.features.filter((pfeature) => pfeature.id !== features[0].id);
   onStateChange(state);
 };
@@ -91,7 +92,7 @@ export const updateSourcesAndLayers = (sources: IMapLibreSource[], map: maplibre
 };
 
 export const addMovingFeaturesMapListeners = (
-  state: MapLibreState,
+  state: MapLibrePluginState,
   onStateChange: any,
   map: maplibregl.Map,
   canvas: HTMLElement
