@@ -3,7 +3,7 @@ import { LayoutForm, registerPlugin, UIForm, SlimdownView, I18n, render } from '
 import { TextArea } from 'mithril-materialized';
 import { leafletPlugin } from 'mithril-ui-form-leaflet-plugin';
 import { ratingPlugin } from 'mithril-ui-form-rating-plugin';
-import { mapLibrePlugin } from 'mithril-ui-form-maplibre-plugin';
+import { mapLibrePlugin, MapLibrePluginBBox } from 'mithril-ui-form-maplibre-plugin';
 import markerIcon from '../assets/noun-map-pin-626096.png';
 
 export interface IContext {
@@ -162,6 +162,16 @@ You can also include _markdown_ in your UIForm.`,
     id: 'libremap2',
     type: 'libremap',
     style: 'height: 200px',
+    maxBounds: {
+      sw: {
+        lng: 4.322391847973449,
+        lat: 52.10594537493236,
+      },
+      ne: {
+        lng: 4.336521202800014,
+        lat: 52.111738043400635,
+      },
+    } as MapLibrePluginBBox,
     polygonControlBar: false,
     required: true,
     className: 'col s12',

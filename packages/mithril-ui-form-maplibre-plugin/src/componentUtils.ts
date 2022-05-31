@@ -1,8 +1,8 @@
-import { GeoJSONFeature, GeoJSONSource, LayerSpecification, MapLayerMouseEvent } from 'maplibre-gl';
+import { GeoJSONFeature, GeoJSONSource, LayerSpecification, LngLatBoundsLike, MapLayerMouseEvent } from 'maplibre-gl';
 import { FeatureCollection, Point } from 'geojson';
 import { DrawableMap } from './component';
 import MapboxDraw from '@mapbox/mapbox-gl-draw';
-import { MapLibrePluginState } from './plugin';
+import { MapLibrePluginBBox, MapLibrePluginState } from './plugin';
 
 interface IMapLibreLayer {
   id: string;
@@ -184,4 +184,11 @@ export const createMapboxDrawBasedOnContext = (polygonControlBar: boolean, polyg
     });
   }
   return null;
+};
+
+export const convertToLngLatBoundsLike = (input: MapLibrePluginBBox) => {
+  return [
+    [input.sw.lng, input.sw.lat],
+    [input.ne.lng, input.ne.lat],
+  ] as LngLatBoundsLike;
 };

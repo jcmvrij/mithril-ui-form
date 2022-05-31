@@ -18,10 +18,10 @@ export interface MapLibrePluginState {
   polygons: GeoJSONFeature[];
 }
 
-// export interface MapLibrePluginState {
-//   sources: IMapLibreSource[];
-//   polygons: Feature<Polygon>[];
-// }
+export interface MapLibrePluginBBox {
+  sw: { lng: number; lat: number };
+  ne: { lng: number; lat: number };
+}
 
 // type MapLibrePluginType = PluginType & {
 //   options: MapLibrePluginOptions;
@@ -41,6 +41,7 @@ const mapLibrePluginFactory: PluginType = () => {
         style = 'height: 400px',
         mapstyle = 'https://geodata.nationaalgeoregister.nl/beta/topotiles-viewer/styles/achtergrond.json',
         center = [4.327, 52.11],
+        maxBounds,
         zoom = 15.99,
         maxZoom = 15.99,
         polygonControlBar = true,
@@ -53,6 +54,7 @@ const mapLibrePluginFactory: PluginType = () => {
         style,
         mapstyle,
         center,
+        maxBounds,
         zoom,
         maxZoom,
         sources,

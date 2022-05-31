@@ -21,8 +21,9 @@ import {
   uniqueId,
   updatePolygons,
   updateSourcesAndLayers,
+  convertToLngLatBoundsLike,
 } from './componentUtils';
-import { MapLibrePluginState } from './plugin';
+import { MapLibrePluginBBox, MapLibrePluginState } from './plugin';
 import 'maplibre-gl/dist/maplibre-gl.css';
 import '@mapbox/mapbox-gl-draw/dist/mapbox-gl-draw.css';
 
@@ -33,11 +34,12 @@ export interface IMapLibreMap extends Attributes {
   mapstyle: string;
   center: LngLatLike;
   zoom: number;
-  maxZoom: number | null;
+  maxZoom: number;
   sources: IMapLibreSource[];
   polygons: GeoJSONFeature[];
   polygonControlBar: boolean;
   drawnPolygonLimit: number;
+  maxBounds?: MapLibrePluginBBox;
   mapIcons?: Array<[img: string, name: string]>;
   mapFallbackIcon?: string;
   onStateChange: (state: MapLibrePluginState) => void;
@@ -90,6 +92,7 @@ export const mapLibreMap: FactoryComponent<IMapLibreMap> = () => {
         onStateChange,
         mapstyle,
         center,
+        maxBounds,
         zoom,
         maxZoom,
         polygonControlBar,
@@ -105,6 +108,7 @@ export const mapLibreMap: FactoryComponent<IMapLibreMap> = () => {
         zoom: zoom,
         maxZoom: maxZoom,
       });
+      if (maxBounds) map.setMaxBounds(convertToLngLatBoundsLike(maxBounds));
       if (mapIcons) addIcons(map, mapIcons);
       if (mapFallbackIcon) addFallbackIcon(map, mapFallbackIcon);
 
